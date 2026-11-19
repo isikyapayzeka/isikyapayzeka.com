@@ -1,33 +1,74 @@
 # isikyapayzeka.com
 
-Işık Yapay Zeka & Veri Bilimi Kulübü'nün sitesi. Bu depoya yapılan her değişiklik Netlify tarafından 1–2 dakika içinde yayına alınır.
+Işık Yapay Zeka & Veri Bilimi Kulübü'nün sitesi. Bu depoya yapılan her değişiklik Netlify tarafından 1–2 dakika içinde yayına alınır. Site [Astro](https://astro.build) ile yapılmıştır, ama içeriği güncellemek için kod bilmeniz gerekmez.
 
-| Adres | Ne gösterir | Dosya |
+| Adres | Ne gösterir | Nereden düzenlenir |
 |---|---|---|
-| https://isikyapayzeka.com/link | Kulübün link sayfası | `link/index.html` |
-| https://isikyapayzeka.com/qr | Yeni yaka kartlarındaki QR. Şu an `/link`'e gider. | `_redirects` |
-| https://isikyapayzeka.com | Ana site hazır olana kadar `/link`'e gider. | `_redirects` |
+| https://isikyapayzeka.com | Ana sayfa (TR). İngilizcesi `/en/` | `src/data/`, `src/content/etkinlikler/` |
+| /etkinlikler/ · /en/events/ | Yaklaşan ve geçmiş etkinlikler | `src/content/etkinlikler/` |
+| /hakkimizda/ · /en/about/ | Kulüp, ekip, iletişim | `src/data/ayarlar.yml`, `src/data/ekip.yml` |
+| /sirketler-icin/ · /en/partners/ | Şirketler ve konuşmacılar için | `src/data/ortaklar.yml` |
+| /link | Yaka kartlarındaki QR sayfası | `public/link/index.html` (CONFIG bloğu) |
+| /qr | Yeni kartlardaki QR, şu an `/link/`'e gider | `public/_redirects` |
 
-Eski yaka kartlarındaki QR `isikyapayzeka.github.io` adresine gider. O adres ayrı bir depodan (`isikyapayzeka/isikyapayzeka.github.io`) `/link`'e yönlendirilir. **O depoyu silmeyin ve adını değiştirmeyin**, yoksa eski kartlar çalışmaz.
-
-Link sayfasının tamamı tek bir dosyadır: `link/index.html`. Kod bilmeniz gerekmez. Yalnızca dosyanın en üstündeki **CONFIG** bloğunu düzenlersiniz.
+Eski yaka kartlarındaki QR `isikyapayzeka.github.io` adresine gider. O adres ayrı bir depodan (`isikyapayzeka/isikyapayzeka.github.io`) `/link/`'e yönlendirilir. **O depoyu silmeyin ve adını değiştirmeyin.**
 
 ---
 
-## Bölüm 1: QR'ın gittiği yeri değiştirmek
+## Site içeriğini güncelleme
+
+Tüm düzenlemeler GitHub web arayüzünden yapılır: dosyayı açın → kalem simgesi → değiştirin → **Commit changes**.
+
+### Yeni etkinlik eklemek
+`src/content/etkinlikler/` klasöründe **Add file → Create new file** deyin. Dosya adı `YIL-AY-GÜN-kisa-ad.md` olsun (örnek: `2026-11-27-datathon.md`). İçine şunu yazın:
+
+```
+---
+baslik: "Mini Datathon"
+baslikEn: "Mini Datathon"
+tarih: "2026-11-27"
+saat: "16:30"
+bitis: "19:30"
+yer: "Şile Kampüsü, LMF 316"
+yerEn: "Şile Campus, LMF 316"
+tur: yarisma
+konuklar:
+  - "Ad Soyad · Şirket"
+ortaklar: ["isik-endustri"]
+ozet: "Bir cümlelik açıklama."
+ozetEn: "One-sentence description."
+kayitLinki: "https://forms.gle/..."
+link: ""
+---
+```
+- `tur` şunlardan biri: `atolye`, `soylesi`, `yayin`, `sosyal`, `yarisma`, `diger`.
+- `ortaklar` içindeki adlar `src/data/ortaklar.yml` dosyasındaki `id` değerleridir.
+- Etkinlik tarihi gelene kadar "Yaklaşan etkinlikler"de durur, bitince kendiliğinden "Geçmiş etkinlikler"e geçer.
+- Etkinlik bittikten sonra Instagram ya da LinkedIn gönderisinin linkini `link` alanına ekleyin.
+
+### Ekip, ortaklar, genel ayarlar
+- `src/data/ekip.yml`: yönetim ekibi. Liste boşken sitede ekip bölümü görünmez. Kişiyi eklemeden önce onayını alın.
+- `src/data/ortaklar.yml`: birlikte çalışılan kulüp ve kurumlar.
+- `src/data/ayarlar.yml`: dönem, vizyon cümlesi, form ve sosyal medya linkleri.
+
+Bir dosyada yazım hatası olursa Netlify siteyi yayınlamaz, eski sürüm yayında kalır. Netlify'daki hata mesajı hangi dosyanın hangi satırda bozulduğunu söyler.
+
+---
+
+## QR'ın gittiği yeri değiştirmek
 
 Yeni kartlardaki QR `isikyapayzeka.com/qr` adresine gider. Kartları yeniden bastırmadan bu adresin nereye gideceğini değiştirebilirsiniz:
 
-1. Depoda `_redirects` dosyasını açın ve kalem simgesine basın.
+1. Depoda `public/_redirects` dosyasını açın ve kalem simgesine basın.
 2. `/qr    /link/   302` satırında ortadaki `/link/` kısmını yeni hedefle değiştirin. Örnek: `/qr    https://forms.gle/....    302`
 3. **Commit changes** deyin. Değişiklik 1–2 dakikada yayına girer.
 
 ---
 
-## Bölüm 2: Sayfayı güncelleme
+## Link sayfasını güncelleme
 
 1. https://github.com/isikyapayzeka/isikyapayzeka.com adresine gidin.
-2. `link` klasörüne, sonra `index.html` dosyasına tıklayın.
+2. `public` → `link` klasörüne, sonra `index.html` dosyasına tıklayın.
 3. Sağ üstteki **kalem simgesine** (Edit this file) basın.
 4. En üstteki `SAYFA AYARLARI (CONFIG)` bloğunda istediğiniz değeri değiştirin.
 5. **Commit changes...** düğmesine basın, açılan pencerede yine **Commit changes** deyin.
@@ -91,7 +132,7 @@ gecmisEtkinlikler: [
 **Dönem değişince:** `donem: "2027–28",`
 
 ### Bir şey bozulursa
-Depoda `link/index.html` → **History** bölümünden önceki sürümü açıp içeriğini geri kopyalayabilirsiniz. Sayfa boş görünüyorsa büyük ihtimalle bir tırnak ya da virgül eksik kalmıştır. Son değiştirdiğiniz satırı kontrol edin.
+Depoda `public/link/index.html` → **History** bölümünden önceki sürümü açıp içeriğini geri kopyalayabilirsiniz. Sayfa boş görünüyorsa büyük ihtimalle bir tırnak ya da virgül eksik kalmıştır. Son değiştirdiğiniz satırı kontrol edin.
 
 ---
 

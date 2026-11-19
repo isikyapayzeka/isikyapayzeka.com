@@ -1,0 +1,85 @@
+---
+import Base from "../layouts/Base.astro";
+import { METIN, type Dil } from "../i18n";
+import { ayarlar, ekip, epostaHref } from "../veri";
+
+interface Props { dil: Dil }
+const { dil } = Astro.props;
+const M = METIN[dil];
+const A = await ayarlar();
+const E = await ekip(dil);
+---
+<Base dil={dil} sayfa="hakkimizda" baslik={M.hakkimizdaBaslik}>
+  <section class="bolum kap giris">
+    <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
+    <h1>{M.hakkimizdaBaslik}</h1>
+    <p class="vizyon">{dil === "en" ? A.vizyonEn : A.vizyon}</p>
+    <p class="ikincil uzun">{M.hakkimizdaMetin}</p>
+  </section>
+
+  <section class="bolum kap iki" aria-labelledby="kimler">
+    <div>
+      <h2 id="kimler">{M.kimler}</h2>
+      <p class="ikincil uzun">{M.kimlerMetin}</p>
+    </div>
+    <div class="satir">
+      {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
+      {A.ekipBasvuru && <a class="btn" href={A.ekipBasvuru}>{M.ekibeKatil}</a>}
+    </div>
+  </section>
+
+  {E.length > 0 && (
+    <section class="bolum kap" aria-labelledby="ekip">
+      <div class="bolum-bas">
+        <h2 id="ekip">{M.ekip}</h2>
+        <p class="etiket">{A.donem}</p>
+      </div>
+      <ul class="ekip">
+        {E.map((k) => (
+          <li>
+            {k.foto ? <img src={`/ekip/${k.foto}`} alt="" width="72" height="72" loading="lazy" /> : <span class="bas-harf" aria-hidden="true">{k.ad.split(" ").map((p) => p[0]).slice(0, 2).join("")}</span>}
+            <div>
+              <h3>{k.linkedin ? <a href={k.linkedin}>{k.ad}</a> : k.ad}</h3>
+              <p class="ikincil">{k.rol}</p>
+              {k.bolum && <p class="etiket">{k.bolum}</p>}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="bolum kap" aria-labelledby="iletisim">
+    <div class="bolum-bas"><h2 id="iletisim">{M.iletisim}</h2></div>
+    <dl class="iletisim">
+      {A.eposta && <div><dt class="etiket">{M.eposta.toLocaleUpperCase(dil)}</dt><dd><a href={epostaHref(A.eposta)} data-kopya={A.eposta}>{A.eposta}</a></dd></div>}
+      {A.instagram && <div><dt class="etiket">INSTAGRAM</dt><dd><a href={A.instagram}>@isikyapayzeka</a></dd></div>}
+      {A.linkedin && <div><dt class="etiket">LINKEDIN</dt><dd><a href={A.linkedin}>{M.kulup}</a></dd></div>}
+      {A.whatsapp && <div><dt class="etiket">WHATSAPP</dt><dd><a href={A.whatsapp}>{M.whatsapp}</a></dd></div>}
+      {A.konum && <div><dt class="etiket">{(dil === "en" ? "Campus" : "Kampüs").toLocaleUpperCase(dil)}</dt><dd><a href={A.konum}>{M.konum}</a></dd></div>}
+    </dl>
+  </section>
+</Base>
+
+<style>
+  .giris { display: grid; gap: 18px; }
+  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.05; font-weight: 700; letter-spacing: -0.02em; }
+  .vizyon { font-size: clamp(20px, 2.6vw, 26px); line-height: 1.4; max-width: 34ch; }
+  .uzun { max-width: 62ch; font-size: 17px; }
+  .iki { display: grid; gap: 20px; }
+  .iki .uzun { margin-top: 10px; }
+  .satir { display: flex; flex-wrap: wrap; gap: 10px; }
+  @media (min-width: 820px) { .iki { grid-template-columns: 1fr auto; align-items: end; } }
+
+  .ekip { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .ekip li { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 16px; background: var(--yuzey); border: 1px solid var(--cizgi); }
+  .ekip img, .bas-harf { width: 72px; height: 72px; border-radius: 50%; flex: none; object-fit: cover; }
+  .bas-harf { display: grid; place-items: center; background: var(--zemin-2); border: 1px solid var(--cizgi); font: 600 20px/1 var(--f-mono); color: var(--ikincil); }
+  .ekip li > div { display: grid; gap: 2px; min-width: 0; }
+  .ekip h3 a { text-decoration: none; }
+
+  .iletisim { display: grid; gap: 0; margin: 0; border-top: 1px solid var(--cizgi); }
+  .iletisim div { display: grid; grid-template-columns: 120px 1fr; gap: 16px; padding-block: 16px; border-bottom: 1px solid var(--cizgi); align-items: baseline; }
+  .iletisim dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  .iletisim a { color: var(--yazi); text-underline-offset: 4px; text-decoration-color: rgba(175, 192, 255, 0.4); }
+</style>

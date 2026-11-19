@@ -1,0 +1,60 @@
+---
+import Base from "../layouts/Base.astro";
+import EtkinlikKarti from "../components/EtkinlikKarti.astro";
+import { METIN, type Dil } from "../i18n";
+import { ayarlar, etkinlikler } from "../veri";
+
+interface Props { dil: Dil }
+const { dil } = Astro.props;
+const M = METIN[dil];
+const A = await ayarlar();
+const tumu = await etkinlikler(dil);
+const simdi = Date.now();
+const yaklasan = tumu.filter((e) => e.bitis.getTime() >= simdi).reverse();
+
+// Geçmiş listesi tüm etkinlikleri içerir; build anında gelecekte olanlar gizli başlar,
+// tarihi geçince tarayıcıda görünür hâle gelir.
+const donemler = new Map<string, typeof tumu>();
+for (const e of tumu) {
+  if (!donemler.has(e.donem)) donemler.set(e.donem, []);
+  donemler.get(e.donem)!.push(e);
+}
+---
+<Base dil={dil} sayfa="etkinlikler" baslik={M.menu.etkinlikler}>
+  <section class="bolum kap" aria-labelledby="yaklasan">
+    <div class="bolum-bas">
+      <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
+      <h1 id="yaklasan">{M.yaklasan}</h1>
+    </div>
+    <ul class="kartlar" id="yaklasan-liste">
+      {yaklasan.map((e) => <EtkinlikKarti e={e} dil={dil} durum="yaklasan" />)}
+    </ul>
+    <div class="bos" data-bos-ise-goster="yaklasan-liste" hidden={yaklasan.length > 0}>
+      <p>{M.yaklasanYok} {M.siradakiYokAlt}</p>
+      <div class="satir">
+        {A.whatsapp && <a class="btn" href={A.whatsapp}>{M.whatsapp}</a>}
+        {A.instagram && <a class="btn" href={A.instagram}>Instagram</a>}
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum kap" aria-labelledby="gecmis">
+    <div class="bolum-bas"><h2 id="gecmis">{M.gecmis}</h2></div>
+    {[...donemler].map(([donem, liste]) => (
+      <div class="donem">
+        <p class="etiket donem-ad">{donem} {M.donem.toLocaleUpperCase(dil)}</p>
+        <ul class="kartlar kartlar--uc">
+          {liste.map((e) => <EtkinlikKarti e={e} dil={dil} durum={e.bitis.getTime() >= simdi ? "gecmis-bekliyor" : "gecmis"} />)}
+        </ul>
+      </div>
+    ))}
+  </section>
+</Base>
+
+<style>
+  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.05; font-weight: 700; letter-spacing: -0.02em; }
+  .bos { display: grid; gap: 14px; color: var(--ikincil); max-width: 640px; }
+  .satir { display: flex; flex-wrap: wrap; gap: 10px; }
+  .donem { display: grid; gap: 14px; margin-bottom: 36px; }
+  .donem-ad { color: var(--soluk); }
+</style>

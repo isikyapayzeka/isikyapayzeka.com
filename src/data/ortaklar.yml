@@ -1,0 +1,22 @@
+# Birlikte etkinlik yaptığımız kulüpler ve destek veren kurumlar.
+# tur: kulup | kurum | sponsor
+- id: hsd-isik
+  ad: "HSD Işık"
+  adEn: "HSD Işık"
+  tur: kulup
+  link: "https://www.instagram.com/hsdisik"
+- id: isik-endustri
+  ad: "Işık Endüstri Mühendisliği Kulübü"
+  adEn: "Işık Industrial Engineering Society"
+  tur: kulup
+  link: "https://www.instagram.com/isikendustri"
+- id: isik-itmis
+  ad: "Işık IT&MIS Kulübü"
+  adEn: "Işık IT&MIS Club"
+  tur: kulup
+  link: "https://www.instagram.com/isikitmis"
+- id: lavazza
+  ad: "Lavazza"
+  adEn: "Lavazza"
+  tur: sponsor
+  link: ""

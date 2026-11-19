@@ -1,0 +1,35 @@
+---
+import { METIN, type Dil } from "../i18n";
+import type { Etkinlik } from "../veri";
+
+interface Props {
+  e: Etkinlik;
+  dil: Dil;
+  // "yaklasan": tarihi geçince tarayıcıda gizlenir. "gecmis-bekliyor": build anında gelecekte, tarihi geçince görünür.
+  durum?: "yaklasan" | "gecmis" | "gecmis-bekliyor";
+}
+const { e, dil, durum = "gecmis" } = Astro.props;
+const M = METIN[dil];
+---
+<li
+  class="kart"
+  data-bitis={e.bitisIso}
+  data-yaklasan={durum === "yaklasan" ? "" : undefined}
+  data-gecmis-bekliyor={durum === "gecmis-bekliyor" ? "" : undefined}
+  hidden={durum === "gecmis-bekliyor"}
+>
+  <div class="kart-ust">
+    <time class="kart-tarih" datetime={e.iso}>{e.gun}{durum === "yaklasan" && ` · ${e.haftaGunu}`}</time>
+    <span class="rozet-tur">{e.tur.toLocaleUpperCase(dil)}</span>
+  </div>
+  <h3>{e.link ? <a href={e.link}>{e.baslik}</a> : e.baslik}</h3>
+  {e.ozet && <p class="kart-ozet">{e.ozet}</p>}
+  <dl class="kart-bilgi">
+    {e.konuklar.length > 0 && <div><dt>{M.konuk.toLocaleUpperCase(dil)}</dt><dd>{e.konuklar.join(", ")}</dd></div>}
+    {e.ortaklar.length > 0 && <div><dt>{M.ortak.toLocaleUpperCase(dil)}</dt><dd>{e.ortaklar.join(", ")}</dd></div>}
+    {(e.yer || e.saat) && <div><dt>{(dil === "en" ? "Where" : "Yer").toLocaleUpperCase(dil)}</dt><dd>{[e.yer, e.saat].filter(Boolean).join(" · ")}</dd></div>}
+  </dl>
+  {(durum === "yaklasan" && e.kayitLinki) && (
+    <div class="kart-alt"><a class="btn btn--ana" href={e.kayitLinki}>{M.kayitOl}</a></div>
+  )}
+</li>

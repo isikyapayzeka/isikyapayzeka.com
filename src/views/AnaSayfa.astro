@@ -1,0 +1,130 @@
+---
+import Base from "../layouts/Base.astro";
+import EtkinlikKarti from "../components/EtkinlikKarti.astro";
+import { METIN, yol, type Dil } from "../i18n";
+import { ayarlar, etkinlikler, ortaklar, rakamlar } from "../veri";
+
+interface Props { dil: Dil }
+const { dil } = Astro.props;
+const M = METIN[dil];
+const A = await ayarlar();
+const tumu = await etkinlikler(dil);
+const simdi = Date.now();
+const yaklasan = tumu.filter((e) => e.bitis.getTime() >= simdi).reverse();
+const gecmis = tumu.filter((e) => e.bitis.getTime() < simdi);
+const R = await rakamlar();
+const O = await ortaklar(dil);
+---
+<Base dil={dil} sayfa="anasayfa">
+  <section class="hero kap">
+    <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
+    <h1>{M.kulup}</h1>
+    <p class="hero-vizyon">{dil === "en" ? A.vizyonEn : A.vizyon}</p>
+    <div class="hero-cta">
+      {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
+      <a class="btn" href={yol("sirketler", dil)}>{M.sirketlerIcin}</a>
+    </div>
+    <dl class="rakamlar">
+      {M.rakamlar.map((r) => (
+        <div><dt class="etiket">{r.etiket.toLocaleUpperCase(dil)}</dt><dd>{R[r.anahtar as keyof typeof R]}</dd></div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="bolum kap" aria-labelledby="siradaki">
+    <div class="bolum-bas">
+      <p class="etiket" id="siradaki">{M.siradaki.toLocaleUpperCase(dil)}</p>
+    </div>
+    <ul class="kartlar" id="yaklasan-liste">
+      {yaklasan.slice(0, 2).map((e) => <EtkinlikKarti e={e} dil={dil} durum="yaklasan" />)}
+    </ul>
+    <div class="bos-kart" data-bos-ise-goster="yaklasan-liste" hidden={yaklasan.length > 0}>
+      <h3>{M.siradakiYok}</h3>
+      <p class="ikincil">{M.siradakiYokAlt}</p>
+      <div class="hero-cta">
+        {A.whatsapp && <a class="btn" href={A.whatsapp}>{M.whatsapp}</a>}
+        {A.instagram && <a class="btn" href={A.instagram}>Instagram</a>}
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum kap" aria-labelledby="ne-yapiyoruz">
+    <div class="bolum-bas">
+      <h2 id="ne-yapiyoruz">{M.neYapiyoruz}</h2>
+    </div>
+    <ol class="faaliyetler">
+      {M.faaliyetler.map((f) => (
+        <li>
+          <span class="faaliyet-isaret" aria-hidden="true"></span>
+          <div>
+            <h3>{f.baslik}</h3>
+            <p class="ikincil">{f.metin}</p>
+            <p class="etiket faaliyet-ornek">{f.ornek}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="bolum kap" aria-labelledby="son-etkinlikler">
+    <div class="bolum-bas bolum-bas--satir">
+      <h2 id="son-etkinlikler">{M.sonEtkinlikler}</h2>
+      <a class="metin-link" href={yol("etkinlikler", dil)}>{M.tumEtkinlikler} →</a>
+    </div>
+    <ul class="kartlar kartlar--uc">
+      {gecmis.slice(0, 3).map((e) => <EtkinlikKarti e={e} dil={dil} />)}
+    </ul>
+  </section>
+
+  <section class="bolum kap katil" aria-labelledby="kimler">
+    <div>
+      <h2 id="kimler">{M.kimler}</h2>
+      <p class="ikincil katil-metin">{M.kimlerMetin}</p>
+    </div>
+    <div class="hero-cta">
+      {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
+      {A.ekipBasvuru && <a class="btn" href={A.ekipBasvuru}>{M.ekibeKatil}</a>}
+    </div>
+  </section>
+
+  {O.length > 0 && (
+    <section class="bolum kap" aria-labelledby="birlikte">
+      <div class="bolum-bas"><p class="etiket" id="birlikte">{M.birlikte.toLocaleUpperCase(dil)}</p></div>
+      <ul class="ortaklar">
+        {O.map((o) => <li>{o.link ? <a href={o.link}>{o.ad}</a> : o.ad}</li>)}
+      </ul>
+    </section>
+  )}
+</Base>
+
+<style>
+  .hero { padding-block: 72px 40px; display: grid; gap: 22px; }
+  .hero h1 { font-size: clamp(36px, 7.4vw, 72px); line-height: 1.02; font-weight: 700; letter-spacing: -0.02em; max-width: 14ch; }
+  .hero-vizyon { font-size: clamp(18px, 2.4vw, 23px); line-height: 1.45; color: var(--ikincil); max-width: 38ch; }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .rakamlar { display: flex; flex-wrap: wrap; gap: 14px 40px; margin: 18px 0 0; padding-top: 22px; border-top: 1px solid var(--cizgi); }
+  .rakamlar div { display: flex; flex-direction: column-reverse; gap: 2px; }
+  .rakamlar dd { margin: 0; font-size: 40px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  @media (min-width: 820px) { .hero { padding-block: 120px 56px; } }
+
+  .bos-kart { display: grid; gap: 12px; padding: 24px; border-radius: 16px; border: 1px dashed var(--cizgi); max-width: 640px; }
+
+  .faaliyetler { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--cizgi); }
+  .faaliyetler li { display: grid; grid-template-columns: 14px 1fr; gap: 16px; padding-block: 22px; border-bottom: 1px solid var(--cizgi); }
+  .faaliyetler li > div { display: grid; gap: 6px; min-width: 0; }
+  .faaliyet-isaret { width: 8px; height: 8px; margin-top: 10px; border-radius: 50%; background: var(--vurgu); box-shadow: 0 0 0 4px rgba(76, 132, 255, 0.18); }
+  .faaliyet-ornek { color: var(--soluk); }
+  @media (min-width: 820px) {
+    .faaliyetler { grid-template-columns: repeat(2, 1fr); column-gap: 48px; border-top: 0; }
+    .faaliyetler li { border-top: 1px solid var(--cizgi); border-bottom: 0; }
+  }
+
+  .katil { display: grid; gap: 20px; }
+  .katil-metin { max-width: 52ch; margin-top: 10px; font-size: 17px; }
+  @media (min-width: 820px) { .katil { grid-template-columns: 1fr auto; align-items: end; } }
+
+  .ortaklar { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .ortaklar li { border: 1px solid var(--cizgi); border-radius: 999px; padding: 10px 16px; font-weight: 500; }
+  .ortaklar a { text-decoration: none; }
+  .ortaklar a:hover { text-decoration: underline; text-underline-offset: 4px; }
+</style>

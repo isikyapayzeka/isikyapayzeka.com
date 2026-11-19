@@ -1,0 +1,317 @@
+---
+import { METIN, YOLLAR, yol, type Dil, type Sayfa } from "../i18n";
+import { ayarlar, epostaHref } from "../veri";
+
+interface Props {
+  dil: Dil;
+  sayfa: Sayfa;
+  baslik?: string;
+  aciklama?: string;
+}
+const { dil, sayfa, baslik, aciklama } = Astro.props;
+const M = METIN[dil];
+const A = await ayarlar();
+const digerDil: Dil = dil === "tr" ? "en" : "tr";
+const sayfaBasligi = baslik ? `${baslik} · ${M.kulup}` : M.kulup;
+const sayfaAciklamasi = aciklama ?? (dil === "en" ? A.vizyonEn : A.vizyon);
+const kanonik = new URL(yol(sayfa, dil), Astro.site).href;
+const guncelleme = new Intl.DateTimeFormat(M.yerel, { timeZone: "Europe/Istanbul", day: "numeric", month: "long", year: "numeric" }).format(new Date());
+const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil), ad: M.menu[s] }));
+---
+<!doctype html>
+<html lang={dil}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>{sayfaBasligi}</title>
+  <meta name="description" content={sayfaAciklamasi} />
+  <link rel="canonical" href={kanonik} />
+  <link rel="alternate" hreflang="tr" href={new URL(yol(sayfa, "tr"), Astro.site).href} />
+  <link rel="alternate" hreflang="en" href={new URL(yol(sayfa, "en"), Astro.site).href} />
+  <meta property="og:title" content={sayfaBasligi} />
+  <meta property="og:description" content={sayfaAciklamasi} />
+  <meta property="og:url" content={kanonik} />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content={new URL("/img/kulup-logo.png", Astro.site).href} />
+  <meta name="theme-color" content="#070A1F" />
+  <link rel="icon" href="/img/kulup-logo.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" />
+</head>
+<body>
+  <canvas id="ag" aria-hidden="true"></canvas>
+  <a class="atla" href="#icerik">{dil === "en" ? "Skip to content" : "İçeriğe geç"}</a>
+
+  <header class="ust-bar">
+    <div class="kap ust-ic">
+      <a class="marka" href={yol("anasayfa", dil)} aria-label={M.kulup}>
+        <img src="/img/kulup-logo.png" alt="" width="40" height="40" />
+        <span>{M.kulupKisa}</span>
+      </a>
+      <nav class="menu" aria-label={M.menuAc}>
+        <details class="menu-mobil">
+          <summary aria-label={M.menuAc}><span></span><span></span></summary>
+          <ul>
+            {menu.map((m) => <li><a href={m.href} aria-current={m.s === sayfa ? "page" : undefined}>{m.ad}</a></li>)}
+          </ul>
+        </details>
+        <ul class="menu-genis">
+          {menu.filter((m) => m.s !== "anasayfa").map((m) => <li><a href={m.href} aria-current={m.s === sayfa ? "page" : undefined}>{m.ad}</a></li>)}
+        </ul>
+      </nav>
+      <a class="dil" href={yol(sayfa, digerDil)} hreflang={digerDil} lang={digerDil}>{M.digerDil}</a>
+    </div>
+  </header>
+
+  <main id="icerik">
+    <slot />
+  </main>
+
+  <footer class="dip">
+    <div class="kap dip-ic">
+      <div class="dip-marka">
+        <div class="rozetler">
+          <img src="/img/isik-logo.png" alt={dil === "en" ? "Işık University logo" : "Işık Üniversitesi logosu"} width="44" height="44" />
+          <img src="/img/kulup-logo.png" alt="" width="44" height="44" />
+        </div>
+        <p class="dip-ad">{M.kulup}</p>
+        <p class="etiket">{(dil === "en" ? "Şile Campus" : "Şile Kampüsü").toLocaleUpperCase(dil)} · {A.donem}</p>
+      </div>
+      <ul class="dip-linkler">
+        {A.instagram && <li><a href={A.instagram}>Instagram</a></li>}
+        {A.linkedin && <li><a href={A.linkedin}>LinkedIn</a></li>}
+        {A.whatsapp && <li><a href={A.whatsapp}>{M.whatsapp}</a></li>}
+        {A.eposta && <li><a href={epostaHref(A.eposta)} data-kopya={A.eposta}>{A.eposta}</a></li>}
+        <li><a href="/link/">{M.linkSayfasi}</a></li>
+      </ul>
+      <p class="dip-alt">
+        {M.sonGuncelleme}: {guncelleme} ·
+        <a href="https://github.com/isikyapayzeka/isikyapayzeka.com/issues/new">{M.hataBildir}</a>
+      </p>
+    </div>
+  </footer>
+
+  <div class="bildirim" role="status" aria-live="polite"></div>
+
+  <script is:inline define:vars={{ kopyalandiMetni: M.kopyalandi }}>
+    // E-posta linkleri: e-posta uygulaması açılmasa bile adres panoya kopyalanır.
+    const bildirim = document.querySelector(".bildirim");
+    let zaman;
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest("[data-kopya]");
+      if (!a) return;
+      const adres = a.getAttribute("data-kopya");
+      const goster = (m) => {
+        bildirim.textContent = m;
+        bildirim.classList.add("acik");
+        clearTimeout(zaman);
+        zaman = setTimeout(() => bildirim.classList.remove("acik"), 3200);
+      };
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(adres).then(() => goster(`${adres} · ${kopyalandiMetni}`), () => goster(adres));
+      else goster(adres);
+    });
+
+    // Etkinlikler build sırasında ayrılır; site yeniden derlenmeden tarihi geçen etkinlik
+    // "yaklaşan" listesinden kalkar, "geçmiş" listesinde görünür.
+    const simdi = Date.now();
+    document.querySelectorAll("[data-bitis]").forEach((el) => {
+      const gecti = Date.parse(el.getAttribute("data-bitis")) < simdi;
+      if (el.hasAttribute("data-yaklasan") && gecti) el.hidden = true;
+      if (el.hasAttribute("data-gecmis-bekliyor") && gecti) el.hidden = false;
+    });
+    document.querySelectorAll("[data-bos-ise-goster]").forEach((el) => {
+      const liste = document.getElementById(el.getAttribute("data-bos-ise-goster"));
+      if (liste && !liste.querySelector("[data-bitis]:not([hidden])")) el.hidden = false;
+    });
+  </script>
+
+  <script is:inline>
+    // Köşelerdeki düğüm ağı (yaka kartı tasarımı). Hareket azaltma tercihinde sabit çizilir.
+    (function () {
+      const c = document.getElementById("ag");
+      if (!c || !c.getContext) return;
+      const ctx = c.getContext("2d");
+      const durgun = matchMedia("(prefers-reduced-motion: reduce)");
+      let W, H, R, D, dugumler = [], sonW = 0;
+      function kur() {
+        const dpr = Math.min(devicePixelRatio || 1, 2);
+        W = sonW = innerWidth; H = innerHeight;
+        c.width = W * dpr; c.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        R = Math.min(Math.max(W, H) * 0.34, W < 600 ? W * 0.6 : 460);
+        D = R * 0.42;
+        dugumler = [];
+        const adet = W < 600 ? 13 : 20;
+        [[W, 0], [0, H]].forEach((k, kume) => {
+          for (let i = 0; i < adet; i++) {
+            const a = Math.random() * Math.PI / 2, r = R * Math.sqrt(Math.random());
+            dugumler.push({
+              kume,
+              x0: k[0] + (kume === 0 ? -1 : 1) * Math.cos(a) * r,
+              y0: k[1] + (kume === 0 ? 1 : -1) * Math.sin(a) * r,
+              gx: 6 + Math.random() * 10, gy: 6 + Math.random() * 10,
+              hz: 0.00012 + Math.random() * 0.00018, faz: Math.random() * 6.28,
+              b: Math.random() < 0.2 ? 2.6 : 1.4,
+            });
+          }
+        });
+      }
+      function ciz(t) {
+        ctx.clearRect(0, 0, W, H);
+        for (const n of dugumler) {
+          n.x = n.x0 + Math.sin(t * n.hz + n.faz) * n.gx;
+          n.y = n.y0 + Math.cos(t * n.hz * 0.8 + n.faz) * n.gy;
+        }
+        ctx.lineWidth = 1;
+        for (let i = 0; i < dugumler.length; i++) for (let j = i + 1; j < dugumler.length; j++) {
+          const p = dugumler[i], q = dugumler[j];
+          if (p.kume !== q.kume) continue;
+          const d = Math.hypot(p.x - q.x, p.y - q.y);
+          if (d < D) {
+            ctx.strokeStyle = `rgba(47,107,255,${(0.55 * (1 - d / D)).toFixed(3)})`;
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+          }
+        }
+        ctx.fillStyle = "rgba(76,132,255,0.9)";
+        for (const n of dugumler) { ctx.beginPath(); ctx.arc(n.x, n.y, n.b, 0, 6.283); ctx.fill(); }
+      }
+      function dongu(t) { ciz(t); if (!durgun.matches) requestAnimationFrame(dongu); }
+      kur();
+      durgun.matches ? ciz(0) : requestAnimationFrame(dongu);
+      let z;
+      addEventListener("resize", () => {
+        if (innerWidth === sonW) return;
+        clearTimeout(z);
+        z = setTimeout(() => { kur(); if (durgun.matches) ciz(0); }, 150);
+      });
+    })();
+  </script>
+</body>
+</html>
+
+<style is:global>
+  /* Yaka kartı "A · Ağ" kimliği: derin lacivert zemin, beyaz yazı, açık mavi ikincil, köşelerde düğüm ağı. */
+  :root {
+    --zemin: #070A1F;
+    --zemin-2: #0B1030;
+    --yuzey: rgba(175, 192, 255, 0.05);
+    --yuzey-hover: rgba(175, 192, 255, 0.09);
+    --cizgi: rgba(175, 192, 255, 0.14);
+    --yazi: #FFFFFF;
+    --ikincil: #AFC0FF;
+    --soluk: #8592C4;
+    --vurgu: #4C84FF;
+    --vurgu-koyu: #2F6BFF;
+    --yesil: #3DDC97;
+    --f-baslik: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --f-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --kap: 1120px;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--zemin);
+    color: var(--yazi);
+    font: 400 16px/1.6 var(--f-baslik);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  main { flex: 1 0 auto; position: relative; z-index: 1; }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  [hidden] { display: none !important; }
+  a, summary, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 2px solid var(--vurgu); outline-offset: 3px; border-radius: 4px; }
+
+  #ag { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.55; }
+  .atla { position: absolute; left: -999px; top: 8px; z-index: 30; background: var(--yazi); color: var(--zemin); padding: 8px 12px; border-radius: 8px; }
+  .atla:focus { left: 16px; }
+
+  .kap { width: 100%; max-width: var(--kap); margin-inline: auto; padding-inline: 20px; }
+  .etiket { font: 500 12px/1.4 var(--f-mono); letter-spacing: 0.1em; color: var(--ikincil); margin: 0; text-transform: none; }
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+  h2 { font-size: clamp(26px, 4vw, 36px); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; }
+  h3 { font-size: 19px; font-weight: 600; line-height: 1.3; }
+  p { margin: 0; }
+  .ikincil { color: var(--ikincil); }
+
+  /* Üst bar */
+  .ust-bar { position: sticky; top: 0; z-index: 20; background: rgba(7, 10, 31, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--cizgi); }
+  .ust-ic { display: flex; align-items: center; gap: 16px; min-height: 64px; }
+  .marka { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; font-size: 17px; margin-right: auto; }
+  .marka img { width: 40px; height: 40px; }
+  .menu ul { list-style: none; margin: 0; padding: 0; }
+  .menu-genis { display: none; gap: 4px; }
+  .menu-genis a, .menu-mobil a { display: block; text-decoration: none; padding: 8px 12px; border-radius: 8px; color: var(--ikincil); font-weight: 500; }
+  .menu-genis a:hover, .menu-mobil a:hover { color: var(--yazi); background: var(--yuzey); }
+  .menu a[aria-current="page"] { color: var(--yazi); }
+  .menu-mobil summary { list-style: none; cursor: pointer; width: 44px; height: 44px; display: grid; place-content: center; gap: 6px; border-radius: 10px; border: 1px solid var(--cizgi); }
+  .menu-mobil summary::-webkit-details-marker { display: none; }
+  .menu-mobil summary span { display: block; width: 18px; height: 2px; background: var(--yazi); border-radius: 2px; }
+  .menu-mobil[open] ul { position: absolute; left: 0; right: 0; top: 64px; background: var(--zemin-2); border-bottom: 1px solid var(--cizgi); padding: 8px 20px 16px; }
+  .menu-mobil[open] a { padding: 12px 8px; font-size: 17px; }
+  .dil { text-decoration: none; font: 500 13px/1 var(--f-mono); letter-spacing: 0.06em; color: var(--ikincil); border: 1px solid var(--cizgi); border-radius: 999px; padding: 10px 14px; min-height: 40px; display: inline-flex; align-items: center; }
+  .dil:hover { color: var(--yazi); border-color: var(--ikincil); }
+  @media (min-width: 820px) {
+    .menu-mobil { display: none; }
+    .menu-genis { display: flex; }
+  }
+
+  /* Butonlar */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 22px; border-radius: 12px; font: 600 16px/1.2 var(--f-baslik); text-decoration: none; border: 1px solid var(--cizgi); background: var(--yuzey); color: var(--yazi); transition: background-color 150ms ease-out, border-color 150ms ease-out, scale 150ms ease-out; }
+  .btn:hover { background: var(--yuzey-hover); border-color: var(--ikincil); }
+  .btn:active { scale: 0.96; }
+  .btn--ana { background: var(--yazi); color: var(--zemin); border-color: var(--yazi); }
+  .btn--ana:hover { background: #E3E9FF; border-color: #E3E9FF; }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:active { scale: none; } }
+
+  /* Bölümler */
+  .bolum { padding-block: 56px; }
+  .bolum-bas { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .bolum-bas--satir { flex-direction: row; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
+  .metin-link { color: var(--ikincil); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(175, 192, 255, 0.4); }
+  .metin-link:hover { color: var(--yazi); }
+  @media (min-width: 820px) { .bolum { padding-block: 80px; } }
+
+  /* Etkinlik kartları */
+  .kartlar { display: grid; gap: 14px; grid-template-columns: 1fr; list-style: none; margin: 0; padding: 0; }
+  @media (min-width: 720px) { .kartlar { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1040px) { .kartlar--uc { grid-template-columns: repeat(3, 1fr); } }
+  .kart { display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 16px; background: var(--yuzey); border: 1px solid var(--cizgi); min-width: 0; }
+  .kart-ust { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .kart-tarih { font: 500 13px/1.3 var(--f-mono); color: var(--ikincil); letter-spacing: 0.04em; }
+  .rozet-tur { font: 500 11px/1 var(--f-mono); letter-spacing: 0.08em; color: var(--yesil); border: 1px solid rgba(61, 220, 151, 0.35); padding: 5px 8px; border-radius: 999px; }
+  .kart h3 a { text-decoration: none; }
+  .kart h3 a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .kart-ozet { color: var(--ikincil); font-size: 15px; }
+  .kart-bilgi { display: grid; gap: 4px; margin: 0; font-size: 14px; }
+  .kart-bilgi div { display: flex; gap: 10px; }
+  .kart-bilgi dt { font: 500 11px/1.9 var(--f-mono); letter-spacing: 0.08em; color: var(--soluk); width: 70px; flex: none; }
+  .kart-bilgi dd { margin: 0; min-width: 0; }
+  .kart-alt { margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; padding-top: 4px; }
+
+  /* Alt bilgi */
+  .dip { position: relative; z-index: 1; border-top: 1px solid var(--cizgi); background: rgba(7, 10, 31, 0.9); margin-top: 24px; }
+  .dip-ic { display: grid; gap: 24px; padding-block: 40px; }
+  .dip-marka { display: grid; gap: 10px; }
+  .rozetler { display: flex; gap: 10px; }
+  .rozetler img { width: 44px; height: 44px; border-radius: 50%; }
+  .rozetler img:first-child { background: var(--yazi); padding: 2px; }
+  .dip-ad { font-weight: 600; font-size: 17px; }
+  .dip-linkler { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .dip-linkler a { color: var(--ikincil); text-decoration: none; padding-block: 6px; display: inline-block; }
+  .dip-linkler a:hover { color: var(--yazi); }
+  .dip-alt { font: 400 12px/1.6 var(--f-mono); color: var(--soluk); }
+  .dip-alt a { color: var(--soluk); }
+  @media (min-width: 820px) { .dip-ic { grid-template-columns: 1fr auto; align-items: start; } .dip-alt { grid-column: 1 / -1; } }
+
+  .bildirim { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 40; max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 12px; background: var(--yazi); color: var(--zemin); font-weight: 500; font-size: 14px; opacity: 0; translate: -50% 8px; pointer-events: none; transition: opacity 200ms ease-out, translate 200ms ease-out; overflow-wrap: anywhere; }
+  .bildirim.acik { opacity: 1; translate: -50% 0; }
+</style>

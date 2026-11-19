@@ -11,7 +11,3 @@ http://www.isikyapayzeka.xyz/*          https://isikyapayzeka.com/:splat  301!
 # Yaka kartı QR'ı bu adrese gider. Hedefi değiştirmek için sadece sağdaki yolu değiştirin.
 # 302 (geçici) kullanılıyor: tarayıcılar ezberlemez, hedef sonradan değiştirilebilir.
 /qr    /link/   302
-
-# Ana site hazır olana kadar ana sayfa link sayfasına gider.
-# Kök dizine bir index.html eklendiğinde bu kural kendiliğinden devre dışı kalır.
-/      /link/   302
