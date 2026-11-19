@@ -19,7 +19,7 @@ Link sayfasının tamamı tek bir dosyadır: `link/index.html`. Kod bilmeniz ger
 Yeni kartlardaki QR `isikyapayzeka.com/qr` adresine gider. Kartları yeniden bastırmadan bu adresin nereye gideceğini değiştirebilirsiniz:
 
 1. Depoda `_redirects` dosyasını açın ve kalem simgesine basın.
-2. `/qr    /link    302` satırında ortadaki `/link` kısmını yeni hedefle değiştirin. Örnek: `/qr    https://forms.gle/....    302`
+2. `/qr    /link/   302` satırında ortadaki `/link/` kısmını yeni hedefle değiştirin. Örnek: `/qr    https://forms.gle/....    302`
 3. **Commit changes** deyin. Değişiklik 1–2 dakikada yayına girer.
 
 ---
