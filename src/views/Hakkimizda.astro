@@ -17,6 +17,19 @@ const E = await ekip(dil);
     <p class="ikincil uzun">{M.hakkimizdaMetin}</p>
   </section>
 
+  <section class="bolum kap" aria-labelledby="ne-yapiyoruz">
+    <div class="bolum-bas"><h2 id="ne-yapiyoruz">{M.neYapiyoruz}</h2></div>
+    <ul class="faaliyetler">
+      {M.faaliyetler.map((f) => (
+        <li>
+          <h3>{f.baslik}</h3>
+          <p class="ikincil">{f.metin}</p>
+          <p class="etiket faaliyet-ornek">{f.ornek}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
   <section class="bolum kap iki" aria-labelledby="kimler">
     <div>
       <h2 id="kimler">{M.kimler}</h2>
@@ -66,6 +79,10 @@ const E = await ekip(dil);
   h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.05; font-weight: 700; letter-spacing: -0.02em; }
   .vizyon { font-size: clamp(20px, 2.6vw, 26px); line-height: 1.4; max-width: 34ch; }
   .uzun { max-width: 62ch; font-size: 17px; }
+  .faaliyetler { list-style: none; margin: 0; padding: 0; display: grid; gap: 0 48px; border-top: 1px solid var(--cizgi); }
+  .faaliyetler li { display: grid; gap: 6px; padding-block: 22px; border-bottom: 1px solid var(--cizgi); }
+  .faaliyet-ornek { color: var(--soluk); }
+  @media (min-width: 820px) { .faaliyetler { grid-template-columns: repeat(2, 1fr); } }
   .iki { display: grid; gap: 20px; }
   .iki .uzun { margin-top: 10px; }
   .satir { display: flex; flex-wrap: wrap; gap: 10px; }

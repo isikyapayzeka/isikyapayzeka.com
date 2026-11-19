@@ -1,0 +1,147 @@
+---
+// Kulübün ağı: üst sırada etkinlikler (soldan sağa tarih sırasıyla), alt sırada birlikte çalışılan
+// kulüp ve kurumlar. Çizgiler gerçek iş birliklerini gösterir. Tamamen veriden, build sırasında çizilir.
+import { METIN, type Dil } from "../i18n";
+import type { Etkinlik } from "../veri";
+
+interface Props {
+  dil: Dil;
+  etkinlikler: Etkinlik[]; // yalnızca geçmiş etkinlikler, herhangi bir sırada
+  ortaklar: { id: string; ad: string }[];
+}
+const { dil, etkinlikler, ortaklar } = Astro.props;
+const M = METIN[dil];
+const E = [...etkinlikler].sort((a, b) => a.baslangic.getTime() - b.baslangic.getTime());
+
+// Metni yaklaşık karakter genişliğine göre satırlara böler (SVG kendiliğinden kaydırmaz).
+function sar(metin: string, en: number, satirSiniri = 3) {
+  const kelimeler = metin.split(" ");
+  const satirlar: string[] = [];
+  let s = "";
+  for (const k of kelimeler) {
+    if ((s + " " + k).trim().length > en && s) { satirlar.push(s); s = k; }
+    else s = (s + " " + k).trim();
+  }
+  if (s) satirlar.push(s);
+  if (satirlar.length > satirSiniri) {
+    const kalan = satirlar.slice(satirSiniri - 1).join(" ");
+    satirlar.splice(satirSiniri - 1, Infinity, kalan.length > en ? kalan.slice(0, en - 1) + "…" : kalan);
+  }
+  return satirlar;
+}
+
+// --- Masaüstü geometri ---
+const G = 1080, KENAR = 90, Y_DUGUM = 136, Y_ORTAK = 300;
+const adim = E.length > 1 ? (G - 2 * KENAR) / (E.length - 1) : 0;
+const ex = E.map((_, i) => (E.length > 1 ? KENAR + i * adim : G / 2));
+
+// Ortak düğümleri, bağlı oldukları etkinliklerin ortalama konumuna yerleşir; çakışmalar itilerek açılır.
+const kullanilan = ortaklar.filter((o) => E.some((e) => e.ortakIdleri.includes(o.id)));
+const ox0 = kullanilan.map((o) => {
+  const xs = E.flatMap((e, i) => (e.ortakIdleri.includes(o.id) ? [ex[i]] : []));
+  return { ...o, x: xs.reduce((a, b) => a + b, 0) / xs.length };
+});
+ox0.sort((a, b) => a.x - b.x);
+const ARALIK = 190;
+for (let i = 1; i < ox0.length; i++) if (ox0[i].x - ox0[i - 1].x < ARALIK) ox0[i].x = ox0[i - 1].x + ARALIK;
+const tasma = ox0.length ? Math.max(0, ox0[ox0.length - 1].x - (G - KENAR)) : 0;
+const OX = ox0.map((o) => ({ ...o, x: Math.max(KENAR, o.x - tasma) }));
+const oxBul = new Map(OX.map((o) => [o.id, o.x]));
+const ilk = E[0], son = E[E.length - 1];
+---
+{E.length > 0 && (
+  <figure class="ag">
+    <figcaption class="ag-ust">
+      <p class="etiket">{(dil === "en" ? "The club's network" : "Kulübün ağı").toLocaleUpperCase(dil)} · {`${ilk.gunKisa} ${ilk.baslangic.getFullYear()} – ${son.gunKisa} ${son.baslangic.getFullYear()}`.toLocaleUpperCase(dil)}</p>
+      <p class="ag-aciklama">
+        {dil === "en"
+          ? `${E.length} events, and the ${OX.length} clubs and organisations we ran them with.`
+          : `Düzenlediğimiz ${E.length} etkinlik ve onları birlikte yaptığımız ${OX.length} kulüp ve kurum.`}
+      </p>
+    </figcaption>
+
+    <svg class="ag-genis" viewBox={`0 0 ${G} 360`} role="group" aria-label={dil === "en" ? "Events and partners" : "Etkinlikler ve ortaklar"}>
+      <defs>
+        <linearGradient id="ag-kenar" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#4C84FF" />
+          <stop offset="1" stop-color="#3DDC97" />
+        </linearGradient>
+      </defs>
+      <line x1={ex[0]} y1={Y_DUGUM} x2={ex[ex.length - 1]} y2={Y_DUGUM} class="ag-zaman" />
+      {E.map((e, i) => (
+        <a href={e.link || undefined} class="ag-etkinlik">
+          {e.ortakIdleri.filter((id) => oxBul.has(id)).map((id) => (
+            <path class="ag-bag" d={`M ${ex[i]} ${Y_DUGUM} C ${ex[i]} ${(Y_DUGUM + Y_ORTAK) / 2} ${oxBul.get(id)} ${(Y_DUGUM + Y_ORTAK) / 2} ${oxBul.get(id)} ${Y_ORTAK}`} />
+          ))}
+          <text x={ex[i]} y="28" class="ag-tarih" text-anchor="middle">{`${e.gunKisa} ${e.baslangic.getFullYear()}`}</text>
+          {sar(e.baslik, 20).map((s, j, t) => (
+            <text x={ex[i]} y={Y_DUGUM - 22 - (t.length - 1 - j) * 19} class="ag-baslik" text-anchor="middle">{s}</text>
+          ))}
+          <circle cx={ex[i]} cy={Y_DUGUM} r="8" class="ag-dugum" />
+          <circle cx={ex[i]} cy={Y_DUGUM} r="3" class="ag-dugum-ic" />
+        </a>
+      ))}
+      {OX.map((o) => (
+        <g class="ag-ortak">
+          <circle cx={o.x} cy={Y_ORTAK} r="6" />
+          {sar(o.ad, 22, 2).map((s, j) => <text x={o.x} y={Y_ORTAK + 28 + j * 18} text-anchor="middle">{s}</text>)}
+        </g>
+      ))}
+    </svg>
+
+    <ol class="ag-dar">
+      {E.map((e) => (
+        <li>
+          <span class="ag-dar-dugum" aria-hidden="true"></span>
+          <time class="ag-tarih-html" datetime={e.iso}>{`${e.gunKisa} ${e.baslangic.getFullYear()}`}</time>
+          {e.link ? <a href={e.link} class="ag-dar-baslik">{e.baslik}</a> : <span class="ag-dar-baslik">{e.baslik}</span>}
+          {e.ortaklar.length > 0 && (
+            <ul class="ag-dar-ortaklar" aria-label={M.ortak}>
+              {e.ortaklar.map((o) => <li>{o}</li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ol>
+  </figure>
+)}
+
+<style>
+  .ag { margin: 0; display: grid; gap: 24px; }
+  .ag-ust { display: grid; gap: 8px; }
+  .ag-aciklama { color: var(--ikincil); font-size: 17px; max-width: 52ch; }
+
+  .ag-genis { display: none; width: 100%; height: auto; overflow: visible; }
+  .ag-zaman { stroke: rgba(175, 192, 255, 0.28); stroke-width: 1; stroke-dasharray: 2 6; }
+  .ag-bag { fill: none; stroke: url(#ag-kenar); stroke-width: 1.4; opacity: 0.45; transition: opacity 150ms ease-out, stroke-width 150ms ease-out; }
+  .ag-tarih { font: 500 12.5px var(--f-mono); fill: var(--ikincil); letter-spacing: 0.04em; }
+  .ag-baslik { font: 600 15.5px var(--f-baslik); fill: var(--yazi); }
+  .ag-dugum { fill: var(--zemin); stroke: #4C84FF; stroke-width: 2; transition: stroke 150ms ease-out; }
+  .ag-dugum-ic { fill: #4C84FF; }
+  .ag-ortak circle { fill: var(--zemin); stroke: #3DDC97; stroke-width: 2; }
+  .ag-ortak text { font: 500 14px var(--f-baslik); fill: var(--ikincil); }
+  .ag-etkinlik:hover .ag-bag, .ag-etkinlik:focus-visible .ag-bag { opacity: 1; stroke-width: 2.2; }
+  .ag-etkinlik:hover .ag-dugum, .ag-etkinlik:focus-visible .ag-dugum { stroke: #FFFFFF; }
+  .ag-etkinlik:hover .ag-baslik { text-decoration: underline; }
+  .ag-etkinlik:focus-visible { outline: none; }
+  .ag-etkinlik:focus-visible .ag-baslik { fill: #FFFFFF; text-decoration: underline; }
+
+  /* Dar ekran: aynı veri dikey bir zaman çizgisi olarak */
+  .ag-dar { list-style: none; margin: 0; padding: 0 0 0 4px; position: relative; display: grid; gap: 22px; }
+  .ag-dar::before { content: ""; position: absolute; left: 10px; top: 8px; bottom: 8px; border-left: 1px dashed rgba(175, 192, 255, 0.3); }
+  .ag-dar > li { position: relative; padding-left: 32px; display: grid; gap: 4px; }
+  .ag-dar-dugum { position: absolute; left: 0; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--zemin); border: 2px solid #4C84FF; box-shadow: inset 0 0 0 3px var(--zemin), inset 0 0 0 7px #4C84FF; }
+  .ag-tarih-html { font: 500 12.5px/1.4 var(--f-mono); color: var(--ikincil); letter-spacing: 0.04em; }
+  .ag-dar-baslik { font-weight: 600; font-size: 18px; line-height: 1.3; text-decoration: none; }
+  a.ag-dar-baslik:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .ag-dar-ortaklar { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .ag-dar-ortaklar li { font-size: 13px; color: var(--ikincil); border: 1px solid rgba(61, 220, 151, 0.4); border-radius: 999px; padding: 3px 10px; }
+
+  @media (min-width: 900px) {
+    .ag-genis { display: block; }
+    .ag-dar { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ag-bag, .ag-dugum { transition: none; }
+  }
+</style>

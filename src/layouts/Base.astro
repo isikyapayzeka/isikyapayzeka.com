@@ -40,7 +40,6 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" />
 </head>
 <body>
-  <canvas id="ag" aria-hidden="true"></canvas>
   <a class="atla" href="#icerik">{dil === "en" ? "Skip to content" : "İçeriğe geç"}</a>
 
   <header class="ust-bar">
@@ -126,67 +125,6 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
     });
   </script>
 
-  <script is:inline>
-    // Köşelerdeki düğüm ağı (yaka kartı tasarımı). Hareket azaltma tercihinde sabit çizilir.
-    (function () {
-      const c = document.getElementById("ag");
-      if (!c || !c.getContext) return;
-      const ctx = c.getContext("2d");
-      const durgun = matchMedia("(prefers-reduced-motion: reduce)");
-      let W, H, R, D, dugumler = [], sonW = 0;
-      function kur() {
-        const dpr = Math.min(devicePixelRatio || 1, 2);
-        W = sonW = innerWidth; H = innerHeight;
-        c.width = W * dpr; c.height = H * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        R = Math.min(Math.max(W, H) * 0.34, W < 600 ? W * 0.6 : 460);
-        D = R * 0.42;
-        dugumler = [];
-        const adet = W < 600 ? 13 : 20;
-        [[W, 0], [0, H]].forEach((k, kume) => {
-          for (let i = 0; i < adet; i++) {
-            const a = Math.random() * Math.PI / 2, r = R * Math.sqrt(Math.random());
-            dugumler.push({
-              kume,
-              x0: k[0] + (kume === 0 ? -1 : 1) * Math.cos(a) * r,
-              y0: k[1] + (kume === 0 ? 1 : -1) * Math.sin(a) * r,
-              gx: 6 + Math.random() * 10, gy: 6 + Math.random() * 10,
-              hz: 0.00012 + Math.random() * 0.00018, faz: Math.random() * 6.28,
-              b: Math.random() < 0.2 ? 2.6 : 1.4,
-            });
-          }
-        });
-      }
-      function ciz(t) {
-        ctx.clearRect(0, 0, W, H);
-        for (const n of dugumler) {
-          n.x = n.x0 + Math.sin(t * n.hz + n.faz) * n.gx;
-          n.y = n.y0 + Math.cos(t * n.hz * 0.8 + n.faz) * n.gy;
-        }
-        ctx.lineWidth = 1;
-        for (let i = 0; i < dugumler.length; i++) for (let j = i + 1; j < dugumler.length; j++) {
-          const p = dugumler[i], q = dugumler[j];
-          if (p.kume !== q.kume) continue;
-          const d = Math.hypot(p.x - q.x, p.y - q.y);
-          if (d < D) {
-            ctx.strokeStyle = `rgba(47,107,255,${(0.55 * (1 - d / D)).toFixed(3)})`;
-            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
-          }
-        }
-        ctx.fillStyle = "rgba(76,132,255,0.9)";
-        for (const n of dugumler) { ctx.beginPath(); ctx.arc(n.x, n.y, n.b, 0, 6.283); ctx.fill(); }
-      }
-      function dongu(t) { ciz(t); if (!durgun.matches) requestAnimationFrame(dongu); }
-      kur();
-      durgun.matches ? ciz(0) : requestAnimationFrame(dongu);
-      let z;
-      addEventListener("resize", () => {
-        if (innerWidth === sonW) return;
-        clearTimeout(z);
-        z = setTimeout(() => { kur(); if (durgun.matches) ciz(0); }, 150);
-      });
-    })();
-  </script>
 </body>
 </html>
 
@@ -230,7 +168,6 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   a, summary, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   :focus-visible { outline: 2px solid var(--vurgu); outline-offset: 3px; border-radius: 4px; }
 
-  #ag { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.55; }
   .atla { position: absolute; left: -999px; top: 8px; z-index: 30; background: var(--yazi); color: var(--zemin); padding: 8px 12px; border-radius: 8px; }
   .atla:focus { left: 16px; }
 
@@ -284,10 +221,10 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   .kartlar { display: grid; gap: 14px; grid-template-columns: 1fr; list-style: none; margin: 0; padding: 0; }
   @media (min-width: 720px) { .kartlar { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1040px) { .kartlar--uc { grid-template-columns: repeat(3, 1fr); } }
-  .kart { display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 16px; background: var(--yuzey); border: 1px solid var(--cizgi); min-width: 0; }
+  .kart { display: flex; flex-direction: column; gap: 12px; padding: 22px; border-radius: 16px; background: linear-gradient(160deg, rgba(76, 132, 255, 0.16), rgba(76, 132, 255, 0.03) 70%); border: 1px solid rgba(76, 132, 255, 0.45); min-width: 0; }
   .kart-ust { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
   .kart-tarih { font: 500 13px/1.3 var(--f-mono); color: var(--ikincil); letter-spacing: 0.04em; }
-  .rozet-tur { font: 500 11px/1 var(--f-mono); letter-spacing: 0.08em; color: var(--yesil); border: 1px solid rgba(61, 220, 151, 0.35); padding: 5px 8px; border-radius: 999px; }
+  .kart-tur { font: 500 12.5px/1.3 var(--f-mono); color: var(--soluk); }
   .kart h3 a { text-decoration: none; }
   .kart h3 a:hover { text-decoration: underline; text-underline-offset: 4px; }
   .kart-ozet { color: var(--ikincil); font-size: 15px; }

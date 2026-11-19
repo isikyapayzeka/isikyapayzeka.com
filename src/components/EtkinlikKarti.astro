@@ -20,7 +20,7 @@ const M = METIN[dil];
 >
   <div class="kart-ust">
     <time class="kart-tarih" datetime={e.iso}>{e.gun}{durum === "yaklasan" && ` · ${e.haftaGunu}`}</time>
-    <span class="rozet-tur">{e.tur.toLocaleUpperCase(dil)}</span>
+    <span class="kart-tur">{e.tur}</span>
   </div>
   <h3>{e.link ? <a href={e.link}>{e.baslik}</a> : e.baslik}</h3>
   {e.ozet && <p class="kart-ozet">{e.ozet}</p>}

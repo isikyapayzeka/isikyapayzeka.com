@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import EtkinlikKarti from "../components/EtkinlikKarti.astro";
+import EtkinlikSatiri from "../components/EtkinlikSatiri.astro";
 import { METIN, type Dil } from "../i18n";
 import { ayarlar, etkinlikler } from "../veri";
 
@@ -24,7 +25,8 @@ for (const e of tumu) {
   <section class="bolum kap" aria-labelledby="yaklasan">
     <div class="bolum-bas">
       <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
-      <h1 id="yaklasan">{M.yaklasan}</h1>
+      <h1>{M.menu.etkinlikler}</h1>
+      <h2 id="yaklasan" class="alt-baslik">{M.yaklasan}</h2>
     </div>
     <ul class="kartlar" id="yaklasan-liste">
       {yaklasan.map((e) => <EtkinlikKarti e={e} dil={dil} durum="yaklasan" />)}
@@ -43,8 +45,8 @@ for (const e of tumu) {
     {[...donemler].map(([donem, liste]) => (
       <div class="donem">
         <p class="etiket donem-ad">{donem} {M.donem.toLocaleUpperCase(dil)}</p>
-        <ul class="kartlar kartlar--uc">
-          {liste.map((e) => <EtkinlikKarti e={e} dil={dil} durum={e.bitis.getTime() >= simdi ? "gecmis-bekliyor" : "gecmis"} />)}
+        <ul class="satirlar">
+          {liste.map((e) => <EtkinlikSatiri e={e} dil={dil} bekliyor={e.bitis.getTime() >= simdi} />)}
         </ul>
       </div>
     ))}
@@ -53,8 +55,10 @@ for (const e of tumu) {
 
 <style>
   h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.05; font-weight: 700; letter-spacing: -0.02em; }
+  .alt-baslik { margin-top: 28px; }
   .bos { display: grid; gap: 14px; color: var(--ikincil); max-width: 640px; }
   .satir { display: flex; flex-wrap: wrap; gap: 10px; }
-  .donem { display: grid; gap: 14px; margin-bottom: 36px; }
-  .donem-ad { color: var(--soluk); }
+  .donem { display: grid; gap: 4px; margin-bottom: 40px; }
+  .donem-ad { color: var(--soluk); padding-bottom: 12px; border-bottom: 1px solid var(--cizgi); }
+  .satirlar { list-style: none; margin: 0; padding: 0; }
 </style>

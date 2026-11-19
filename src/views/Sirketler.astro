@@ -38,7 +38,7 @@ const O = await ortaklar(dil);
       <div class="bolum-bas"><h2 id="bugune">{M.sirketBugune}</h2></div>
       <ul class="konuklar">
         {konuklar.map((x) => (
-          <li><span class="etiket">{x.gun} {x.yil}</span><span class="konuk-ad">{x.k}</span><span class="ikincil">{x.etkinlik}</span></li>
+          <li><span class="etiket">{`${x.gun} ${x.yil}`}</span><span class="konuk-ad">{x.k}</span><span class="ikincil">{x.etkinlik}</span></li>
         ))}
       </ul>
       {O.length > 0 && (
