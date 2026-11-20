@@ -12,4 +12,7 @@ ortaklar: ["isik-endustri"]
 ozet: "Microsoft ve bulut ekosistemi, yazılım kariyer yolları ve öğrencilere somut tavsiyeler üzerine soru-cevap."
 ozetEn: "A Q&A on the Microsoft and cloud ecosystem, software career paths and concrete advice for students."
 link: "https://www.linkedin.com/feed/update/urn:li:activity:7409618479672107008/"
+gorsel: "microsoft-sahne"
+gorselAlt: "Mustafa Özdemir, Işık Üniversitesi sahnesinde öğrencilere konuşuyor"
+gorselAltEn: "Mustafa Özdemir speaking to students on the Işık University stage"
 ---

@@ -25,6 +25,12 @@ const etkinlikler = defineCollection({
     ozetEn: z.string().default(""),
     kayitLinki: z.string().default(""),
     link: z.string().default(""),
+    // public/etkinlikler/ içindeki görselin adı. Fotoğrafsa "<ad>-800.jpg" ve "<ad>-1600.jpg"
+    // dosyaları beklenir; afis: true ise tek dosya "<ad>.jpg" kullanılır ve kırpılmadan gösterilir.
+    gorsel: z.string().default(""),
+    gorselAlt: z.string().default(""),
+    gorselAltEn: z.string().default(""),
+    afis: z.boolean().default(false),
   }),
 });
 
@@ -64,6 +70,10 @@ const ayarlar = defineCollection({
     linkedin: z.string().default(""),
     eposta: z.string().default(""),
     konum: z.string().default(""),
+    // Ana sayfanın üstündeki fotoğraf (public/etkinlikler/<kapak>-800.jpg ve -1600.jpg).
+    kapak: z.string().default(""),
+    kapakAlt: z.string().default(""),
+    kapakAltEn: z.string().default(""),
   }),
 });
 

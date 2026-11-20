@@ -46,6 +46,22 @@ link: ""
 - Etkinlik tarihi gelene kadar "Yaklaşan etkinlikler"de durur, bitince kendiliğinden "Geçmiş etkinlikler"e geçer.
 - Etkinlik bittikten sonra Instagram ya da LinkedIn gönderisinin linkini `link` alanına ekleyin.
 
+### Etkinliğe fotoğraf eklemek
+Fotoğrafsız etkinlik kartında kulüp logosu görünür. Fotoğraf eklemek için:
+
+1. Fotoğrafı yatay (4:3) kırpın ve iki boyutta kaydedin: 800 px ve 1600 px genişlik, JPEG.
+2. `public/etkinlikler/` klasörüne `ad-800.jpg` ve `ad-1600.jpg` adlarıyla yükleyin (örnek: `datathon-800.jpg`, `datathon-1600.jpg`).
+3. Etkinlik dosyasına ekleyin:
+   ```
+   gorsel: "datathon"
+   gorselAlt: "Fotoğrafta ne göründüğünü anlatan kısa cümle"
+   gorselAltEn: "Short sentence describing the photo"
+   ```
+
+Elde yalnızca afiş varsa tek dosya yeter (`ad.jpg`, kare) ve `afis: true` satırını da ekleyin. Afiş kırpılmadan gösterilir.
+
+Ana sayfanın üstündeki büyük fotoğraf `src/data/ayarlar.yml` içindeki `kapak` alanından gelir, aynı iki boyut kuralı geçerlidir.
+
 ### Ekip, ortaklar, genel ayarlar
 - `src/data/ekip.yml`: yönetim ekibi. Liste boşken sitede ekip bölümü görünmez. Kişiyi eklemeden önce onayını alın.
 - `src/data/ortaklar.yml`: birlikte çalışılan kulüp ve kurumlar.

@@ -12,4 +12,8 @@ ortaklar: ["hsd-isik"]
 ozet: "AI mühendisliğinde kariyerin ilk adımları ve projeleri teknikten liderliğe taşımak."
 ozetEn: "First steps in an AI engineering career and growing from technical work to leadership."
 link: "https://www.instagram.com/p/DXZdlK_ivr3/"
+gorsel: "kariyer-yayini-afis"
+gorselAlt: "AI Kariyer Yayını afişi"
+gorselAltEn: "AI Career Livestream poster"
+afis: true
 ---

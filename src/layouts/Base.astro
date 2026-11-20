@@ -221,18 +221,26 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   .kartlar { display: grid; gap: 14px; grid-template-columns: 1fr; list-style: none; margin: 0; padding: 0; }
   @media (min-width: 720px) { .kartlar { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1040px) { .kartlar--uc { grid-template-columns: repeat(3, 1fr); } }
-  .kart { display: flex; flex-direction: column; gap: 12px; padding: 22px; border-radius: 16px; background: linear-gradient(160deg, rgba(76, 132, 255, 0.16), rgba(76, 132, 255, 0.03) 70%); border: 1px solid rgba(76, 132, 255, 0.45); min-width: 0; }
-  .kart-ust { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-  .kart-tarih { font: 500 13px/1.3 var(--f-mono); color: var(--ikincil); letter-spacing: 0.04em; }
-  .kart-tur { font: 500 12.5px/1.3 var(--f-mono); color: var(--soluk); }
+  /* Kartın tamamı başlıktaki linke tıklar; kayıt butonu bunun üstünde kalır. */
+  .kart { position: relative; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; background: var(--zemin-2); border: 1px solid var(--cizgi); min-width: 0; transition: border-color 150ms ease-out; }
+  .kart:hover { border-color: rgba(175, 192, 255, 0.4); }
+  .kart--yaklasan { border-color: rgba(76, 132, 255, 0.6); }
+  .kart-gorsel { position: relative; aspect-ratio: 4 / 3; background: #0E1440; overflow: hidden; }
+  .kart-gorsel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: scale 300ms ease-out; }
+  .kart:hover .kart-gorsel img { scale: 1.03; }
+  .kart-gorsel--afis img { object-fit: contain; }
+  .kart-gorsel .kart-logo { inset: 0; margin: auto; width: 96px; height: 96px; object-fit: contain; opacity: 0.5; }
+  .kart-govde { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 22px; flex: 1; }
+  .kart-ust { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 500 12.5px/1.4 var(--f-mono); letter-spacing: 0.04em; color: var(--ikincil); }
+  .kart-ust span { color: var(--soluk); }
   .kart h3 a { text-decoration: none; }
-  .kart h3 a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .kart h3 a::after { content: ""; position: absolute; inset: 0; }
+  .kart:hover h3 a { text-decoration: underline; text-underline-offset: 4px; }
   .kart-ozet { color: var(--ikincil); font-size: 15px; }
-  .kart-bilgi { display: grid; gap: 4px; margin: 0; font-size: 14px; }
-  .kart-bilgi div { display: flex; gap: 10px; }
-  .kart-bilgi dt { font: 500 11px/1.9 var(--f-mono); letter-spacing: 0.08em; color: var(--soluk); width: 70px; flex: none; }
-  .kart-bilgi dd { margin: 0; min-width: 0; }
-  .kart-alt { margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; padding-top: 4px; }
+  .kart-konuk { font-size: 14px; }
+  .kart-alt-bilgi { font-size: 13.5px; color: var(--soluk); }
+  .kart-btn { position: relative; z-index: 1; margin-top: auto; align-self: start; }
+  @media (prefers-reduced-motion: reduce) { .kart-gorsel img { transition: none; } .kart:hover .kart-gorsel img { scale: none; } }
 
   /* Alt bilgi */
   .dip { position: relative; z-index: 1; border-top: 1px solid var(--cizgi); background: rgba(7, 10, 31, 0.9); margin-top: 24px; }

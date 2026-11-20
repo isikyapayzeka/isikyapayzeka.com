@@ -1,9 +1,8 @@
 ---
 import Base from "../layouts/Base.astro";
 import EtkinlikKarti from "../components/EtkinlikKarti.astro";
-import KulupAgi from "../components/KulupAgi.astro";
 import { METIN, yol, type Dil } from "../i18n";
-import { ayarlar, etkinlikler, ortaklar } from "../veri";
+import { ayarlar, etkinlikler } from "../veri";
 
 interface Props { dil: Dil }
 const { dil } = Astro.props;
@@ -12,23 +11,39 @@ const A = await ayarlar();
 const tumu = await etkinlikler(dil);
 const simdi = Date.now();
 const yaklasan = tumu.filter((e) => e.bitis.getTime() >= simdi).reverse();
+// Son etkinlikler: fotoğraflı olanlar önce, en yeni üç tanesi.
 const gecmis = tumu.filter((e) => e.bitis.getTime() < simdi);
-const O = await ortaklar(dil);
+const son = [...gecmis.filter((e) => e.gorsel && !e.afis), ...gecmis.filter((e) => !e.gorsel || e.afis)].slice(0, 3);
+const kapak = A.kapak ? `/etkinlikler/${A.kapak}` : "";
 ---
 <Base dil={dil} sayfa="anasayfa">
-  <section class="hero kap">
-    <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
-    <h1>{M.kulup}</h1>
-    <p class="hero-vizyon">{dil === "en" ? A.vizyonEn : A.vizyon}</p>
-    <div class="satir">
-      {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
-      <a class="btn" href={yol("sirketler", dil)}>{M.sirketlerIcin}</a>
+  <section class="hero">
+    {kapak && (
+      <img
+        class="hero-foto"
+        src={`${kapak}-1600.jpg`}
+        srcset={`${kapak}-800.jpg 800w, ${kapak}-1600.jpg 1600w`}
+        sizes="100vw"
+        alt={dil === "en" ? A.kapakAltEn : A.kapakAlt}
+        width="1600"
+        height="1067"
+        fetchpriority="high"
+      />
+    )}
+    <div class="kap hero-ic">
+      <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
+      <h1>{M.kulup}</h1>
+      <p class="hero-vizyon">{dil === "en" ? A.vizyonEn : A.vizyon}</p>
+      <div class="satir">
+        {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
+        <a class="btn btn--cam" href={yol("etkinlikler", dil)}>{M.tumEtkinlikler}</a>
+      </div>
     </div>
   </section>
 
   {yaklasan.length > 0 && (
-    <section class="kap siradaki" aria-labelledby="siradaki">
-      <p class="etiket" id="siradaki">{M.siradaki.toLocaleUpperCase(dil)}</p>
+    <section class="bolum kap" aria-labelledby="siradaki">
+      <div class="bolum-bas"><h2 id="siradaki">{M.siradaki}</h2></div>
       <ul class="kartlar" id="yaklasan-liste">
         {yaklasan.slice(0, 2).map((e) => <EtkinlikKarti e={e} dil={dil} durum="yaklasan" />)}
       </ul>
@@ -42,38 +57,57 @@ const O = await ortaklar(dil);
     </p>
   </div>
 
-  <section class="bolum kap" aria-label={dil === "en" ? "The club's network" : "Kulübün ağı"}>
-    <KulupAgi dil={dil} etkinlikler={gecmis} ortaklar={O} />
-    <p class="ag-alt"><a class="metin-link" href={yol("etkinlikler", dil)}>{M.tumEtkinlikler} →</a></p>
+  <section class="bolum kap" aria-labelledby="son">
+    <div class="bolum-bas bolum-bas--satir">
+      <h2 id="son">{M.sonEtkinlikler}</h2>
+      <a class="metin-link" href={yol("etkinlikler", dil)}>{M.tumEtkinlikler} →</a>
+    </div>
+    <ul class="kartlar kartlar--uc">
+      {son.map((e) => <EtkinlikKarti e={e} dil={dil} />)}
+    </ul>
   </section>
 
-  <section class="bolum kap katil" aria-labelledby="kimler">
-    <div>
+  <section class="kap katil" aria-labelledby="kimler">
+    <img
+      class="katil-foto"
+      src="/etkinlikler/genai-sinif-800.jpg"
+      srcset="/etkinlikler/genai-sinif-800.jpg 800w, /etkinlikler/genai-sinif-1600.jpg 1600w"
+      sizes="(min-width: 900px) 540px, 100vw"
+      alt={dil === "en" ? "Students working at computers during a workshop" : "Atölyede bilgisayar başında çalışan öğrenciler"}
+      width="800"
+      height="600"
+      loading="lazy"
+    />
+    <div class="katil-metin">
       <h2 id="kimler">{M.kimler}</h2>
-      <p class="ikincil katil-metin">{M.kimlerMetin}</p>
-    </div>
-    <div class="satir">
-      {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
-      {A.ekipBasvuru && <a class="btn" href={A.ekipBasvuru}>{M.ekibeKatil}</a>}
+      <p class="ikincil">{M.kimlerMetin}</p>
+      <div class="satir">
+        {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
+        {A.ekipBasvuru && <a class="btn" href={A.ekipBasvuru}>{M.ekibeKatil}</a>}
+      </div>
     </div>
   </section>
 </Base>
 
 <style>
-  .hero { padding-block: 64px 36px; display: grid; gap: 22px; }
-  .hero h1 { font-size: clamp(40px, 8.4vw, 88px); line-height: 0.98; font-weight: 700; letter-spacing: -0.03em; max-width: 13ch; }
-  .hero-vizyon { font-size: clamp(19px, 2.4vw, 24px); line-height: 1.45; color: var(--ikincil); max-width: 36ch; }
-  .satir { display: flex; flex-wrap: wrap; gap: 10px; }
-  @media (min-width: 820px) { .hero { padding-block: 112px 48px; } }
+  /* Kapak: tam genişlikte etkinlik fotoğrafı, yazı altta lacivert geçişin üstünde. */
+  .hero { position: relative; display: grid; align-items: end; min-height: min(78vh, 760px); overflow: hidden; }
+  .hero-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7, 10, 31, 0.1) 0%, rgba(7, 10, 31, 0.45) 45%, rgba(7, 10, 31, 0.94) 82%, var(--zemin) 100%), linear-gradient(90deg, rgba(7, 10, 31, 0.7) 0%, rgba(7, 10, 31, 0.25) 55%, rgba(7, 10, 31, 0) 80%); }
+  .hero-ic { position: relative; z-index: 1; display: grid; gap: 16px; padding-block: 160px 48px; }
+  .hero h1 { font-size: clamp(36px, 7vw, 76px); line-height: 1; font-weight: 700; letter-spacing: -0.03em; max-width: 14ch; }
+  .hero-vizyon { font-size: clamp(18px, 2.2vw, 22px); line-height: 1.45; color: #DCE3FF; max-width: 40ch; }
+  .hero .etiket { color: #DCE3FF; }
+  .satir { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+  .btn--cam { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .btn--cam:hover { background: rgba(255, 255, 255, 0.18); border-color: #FFFFFF; }
 
-  .siradaki { display: grid; gap: 14px; padding-block: 8px 24px; }
+  .serit { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 0; margin-top: 8px; border-block: 1px solid var(--cizgi); color: var(--ikincil); font-size: 15px; }
+  .serit-nokta { width: 8px; height: 8px; border-radius: 50%; background: var(--yesil); box-shadow: 0 0 0 4px rgba(61, 220, 151, 0.16); }
 
-  .serit { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 0; border-block: 1px solid var(--cizgi); color: var(--ikincil); font-size: 15px; }
-  .serit-nokta { width: 8px; height: 8px; border-radius: 50%; background: #3DDC97; box-shadow: 0 0 0 4px rgba(61, 220, 151, 0.16); }
-
-  .ag-alt { margin-top: 20px; }
-
-  .katil { display: grid; gap: 20px; border-top: 1px solid var(--cizgi); }
-  .katil-metin { max-width: 52ch; margin-top: 10px; font-size: 17px; }
-  @media (min-width: 820px) { .katil { grid-template-columns: 1fr auto; align-items: end; } }
+  .katil { display: grid; gap: 28px; padding-block: 24px 72px; align-items: center; }
+  .katil-foto { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; }
+  .katil-metin { display: grid; gap: 14px; }
+  .katil-metin p { max-width: 46ch; font-size: 17px; }
+  @media (min-width: 900px) { .katil { grid-template-columns: 1fr 1fr; gap: 56px; padding-block: 40px 96px; } }
 </style>

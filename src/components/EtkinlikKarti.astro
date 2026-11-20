@@ -1,4 +1,5 @@
 ---
+// Fotoğraflı etkinlik kartı. Görseli olmayan etkinlikte lacivert bir yer tutucu gösterilir.
 import { METIN, type Dil } from "../i18n";
 import type { Etkinlik } from "../veri";
 
@@ -10,26 +11,45 @@ interface Props {
 }
 const { e, dil, durum = "gecmis" } = Astro.props;
 const M = METIN[dil];
+const yaklasan = durum === "yaklasan";
+const g = e.gorsel ? `/etkinlikler/${e.gorsel}` : "";
+const altBilgi = [
+  e.ortaklar.length ? `${M.ortak}: ${e.ortaklar.join(", ")}` : "",
+  yaklasan ? [e.yer, e.saat].filter(Boolean).join(" · ") : "",
+].filter(Boolean);
 ---
 <li
-  class="kart"
+  class:list={["kart", { "kart--yaklasan": yaklasan }]}
   data-bitis={e.bitisIso}
-  data-yaklasan={durum === "yaklasan" ? "" : undefined}
+  data-yaklasan={yaklasan ? "" : undefined}
   data-gecmis-bekliyor={durum === "gecmis-bekliyor" ? "" : undefined}
   hidden={durum === "gecmis-bekliyor"}
 >
-  <div class="kart-ust">
-    <time class="kart-tarih" datetime={e.iso}>{e.gun}{durum === "yaklasan" && ` · ${e.haftaGunu}`}</time>
-    <span class="kart-tur">{e.tur}</span>
+  <div class:list={["kart-gorsel", { "kart-gorsel--afis": e.afis }]}>
+    {g && e.afis && <img src={`${g}.jpg`} alt={e.gorselAlt} width="640" height="640" loading="lazy" decoding="async" />}
+    {g && !e.afis && (
+      <img
+        src={`${g}-800.jpg`}
+        srcset={`${g}-800.jpg 800w, ${g}-1600.jpg 1600w`}
+        sizes="(min-width: 1040px) 360px, (min-width: 720px) 50vw, 100vw"
+        alt={e.gorselAlt}
+        width="800"
+        height="600"
+        loading="lazy"
+        decoding="async"
+      />
+    )}
+    {!g && <img class="kart-logo" src="/img/kulup-logo.png" alt="" width="96" height="96" loading="lazy" />}
   </div>
-  <h3>{e.link ? <a href={e.link}>{e.baslik}</a> : e.baslik}</h3>
-  {e.ozet && <p class="kart-ozet">{e.ozet}</p>}
-  <dl class="kart-bilgi">
-    {e.konuklar.length > 0 && <div><dt>{M.konuk.toLocaleUpperCase(dil)}</dt><dd>{e.konuklar.join(", ")}</dd></div>}
-    {e.ortaklar.length > 0 && <div><dt>{M.ortak.toLocaleUpperCase(dil)}</dt><dd>{e.ortaklar.join(", ")}</dd></div>}
-    {(e.yer || e.saat) && <div><dt>{(dil === "en" ? "Where" : "Yer").toLocaleUpperCase(dil)}</dt><dd>{[e.yer, e.saat].filter(Boolean).join(" · ")}</dd></div>}
-  </dl>
-  {(durum === "yaklasan" && e.kayitLinki) && (
-    <div class="kart-alt"><a class="btn btn--ana" href={e.kayitLinki}>{M.kayitOl}</a></div>
-  )}
+  <div class="kart-govde">
+    <p class="kart-ust">
+      <time datetime={e.iso}>{yaklasan ? `${e.gun} · ${e.haftaGunu}` : e.gun}</time>
+      <span>{e.tur}</span>
+    </p>
+    <h3>{e.link ? <a href={e.link}>{e.baslik}</a> : e.baslik}</h3>
+    {e.ozet && <p class="kart-ozet">{e.ozet}</p>}
+    {e.konuklar.length > 0 && <p class="kart-konuk">{e.konuklar.join(", ")}</p>}
+    {altBilgi.length > 0 && <p class="kart-alt-bilgi">{altBilgi.join(" · ")}</p>}
+    {yaklasan && e.kayitLinki && <a class="btn btn--ana kart-btn" href={e.kayitLinki}>{M.kayitOl}</a>}
+  </div>
 </li>

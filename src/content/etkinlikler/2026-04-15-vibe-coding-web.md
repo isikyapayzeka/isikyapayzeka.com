@@ -12,4 +12,7 @@ ortaklar: ["hsd-isik", "lavazza"]
 ozet: "2040'tan bir fikri sınırlı sürede tek sayfalık bir web sitesine dönüştürdük."
 ozetEn: "Participants turned an idea from 2040 into a one-page website in limited time."
 link: "https://www.instagram.com/p/DXNQHTKCh81/"
+gorsel: "vibe-sunum"
+gorselAlt: "Katılımcılar atölyede tasarladıkları web sitesini perdede sunuyor"
+gorselAltEn: "Participants presenting the website they built during the workshop"
 ---
