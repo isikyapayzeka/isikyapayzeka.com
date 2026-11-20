@@ -37,12 +37,12 @@ const sosyal = e.link.includes("linkedin.com") ? "LinkedIn" : e.link.includes("i
 <Base
   dil={dil}
   sayfa="etkinlikler"
+  sema={sema}
+  gorselAlt={e.gorselAlt}
   baslik={e.baslik}
   aciklama={aciklama}
   alternatif={{ tr: etkinlikYolu(e.id, "tr"), en: etkinlikYolu(e.id, "en") }}
   gorsel={ogGorsel}
-  gorselAlt={e.gorselAlt}
-  sema={sema}
 >
   <article class="kap detay">
     <a class="geri metin-link" href={yol("etkinlikler", dil)}>← {M.tumEtkinlikler}</a>

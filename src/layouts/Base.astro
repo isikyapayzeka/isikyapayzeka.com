@@ -1,25 +1,26 @@
 ---
+import { jsonLd, kulupSemasi, siteSemasi } from "../seo";
 import { METIN, YOLLAR, yol, type Dil, type Sayfa } from "../i18n";
 import { ayarlar, epostaHref } from "../veri";
-import { jsonLd, kulupSemasi, siteSemasi } from "../seo";
 
 interface Props {
   dil: Dil;
   sayfa: Sayfa;
   baslik?: string;
   aciklama?: string;
+  gorselAlt?: string; // paylaşım görselinin metin karşılığı
+  sema?: Record<string, unknown>[]; // sayfaya özel yapısal veri (src/seo.ts)
+  dizinleme?: boolean; // false ise arama motorları sayfayı listelemez (404 sayfası)
   // Etkinlik sayfası gibi YOLLAR dışındaki sayfalar için iki dildeki adres.
   alternatif?: { tr: string; en: string };
   gorsel?: string; // paylaşım önizlemesi (og:image) için site köküne göre yol
-  gorselAlt?: string;
-  sema?: Record<string, unknown>[]; // sayfaya özel yapısal veri (src/seo.ts)
-  dizinleme?: boolean; // false ise arama motorları sayfayı listelemez (404 sayfası)
 }
-const { dil, sayfa, baslik, aciklama, alternatif, gorsel, gorselAlt, sema = [], dizinleme = true } = Astro.props;
+const { dil, sayfa, baslik, aciklama, alternatif, gorsel } = Astro.props;
 const adres = (d: Dil) => (alternatif ? alternatif[d] : yol(sayfa, d));
 const M = METIN[dil];
 const A = await ayarlar();
 const digerDil: Dil = dil === "tr" ? "en" : "tr";
+const { gorselAlt, sema = [], dizinleme = true } = Astro.props;
 const sayfaBasligi = baslik ? `${baslik} · ${M.kulup}` : M.anaBaslik;
 const sayfaAciklamasi = aciklama ?? M.aciklamalar[sayfa];
 const kanonik = new URL(adres(dil), Astro.site).href;
