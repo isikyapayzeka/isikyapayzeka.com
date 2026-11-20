@@ -3,6 +3,7 @@ import Base from "../layouts/Base.astro";
 import EtkinlikKarti from "../components/EtkinlikKarti.astro";
 import OrtakSeridi from "../components/OrtakSeridi.astro";
 import { METIN, yol, type Dil } from "../i18n";
+import { existsSync } from "node:fs";
 import { ayarlar, etkinlikler, rakamlar } from "../veri";
 
 interface Props { dil: Dil }
@@ -16,22 +17,27 @@ const yaklasan = tumu.filter((e) => e.bitis.getTime() >= simdi).reverse();
 const gecmis = tumu.filter((e) => e.bitis.getTime() < simdi);
 const son = [...gecmis.filter((e) => e.gorsel && !e.afis), ...gecmis.filter((e) => !e.gorsel || e.afis)].slice(0, 3);
 const kapak = A.kapak ? `/etkinlikler/${A.kapak}` : "";
+// Kapağın WebP sürümleri (<ad>-800.webp, <ad>-1600.webp) varsa tarayıcıya önce onlar sunulur; dosya daha küçüktür.
+const kapakWebp = !!A.kapak && existsSync(`public${kapak}-800.webp`) && existsSync(`public${kapak}-1600.webp`);
 // Rakamlar build sırasında veriden sayılır; sayfaya düz metin olarak yazılır.
 const R = await rakamlar();
 ---
 <Base dil={dil} sayfa="anasayfa">
   <section class="hero">
     {kapak && (
-      <img
-        class="hero-foto"
-        src={`${kapak}-1600.jpg`}
-        srcset={`${kapak}-800.jpg 800w, ${kapak}-1600.jpg 1600w`}
-        sizes="100vw"
-        alt={dil === "en" ? A.kapakAltEn : A.kapakAlt}
-        width="1600"
-        height="1067"
-        fetchpriority="high"
-      />
+      <picture>
+        {kapakWebp && <source type="image/webp" srcset={`${kapak}-800.webp 800w, ${kapak}-1600.webp 1600w`} sizes="100vw" />}
+        <img
+          class="hero-foto"
+          src={`${kapak}-1600.jpg`}
+          srcset={`${kapak}-800.jpg 800w, ${kapak}-1600.jpg 1600w`}
+          sizes="100vw"
+          alt={dil === "en" ? A.kapakAltEn : A.kapakAlt}
+          width="1600"
+          height="1067"
+          fetchpriority="high"
+        />
+      </picture>
     )}
     <div class="kap hero-ic">
       <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
