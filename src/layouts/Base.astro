@@ -63,7 +63,10 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   <link rel="icon" href="/img/kulup-logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" />
+  <!-- Yazı tipleri sayfanın çizilmesini bekletmez: stil dosyası arka planda yüklenir, hazır olunca devreye girer. -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" /></noscript>
 </head>
 <body>
   <a class="atla" href="#icerik">{dil === "en" ? "Skip to content" : "İçeriğe geç"}</a>
