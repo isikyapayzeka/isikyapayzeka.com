@@ -93,17 +93,20 @@ const kapak = A.kapak ? `/etkinlikler/${A.kapak}` : "";
   /* Kapak: tam genişlikte etkinlik fotoğrafı, yazı altta lacivert geçişin üstünde. */
   .hero { position: relative; color: #FFFFFF; background: var(--koyu); display: grid; align-items: end; min-height: min(78vh, 760px); overflow: hidden; }
   .hero-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
-  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(26, 23, 21, 0.05) 0%, rgba(26, 23, 21, 0.4) 45%, rgba(26, 23, 21, 0.88) 100%), linear-gradient(90deg, rgba(26, 23, 21, 0.65) 0%, rgba(26, 23, 21, 0.2) 55%, rgba(26, 23, 21, 0) 80%); }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 9, 70, 0.05) 0%, rgba(5, 9, 70, 0.4) 45%, rgba(5, 9, 70, 0.9) 100%), linear-gradient(90deg, rgba(5, 9, 70, 0.65) 0%, rgba(5, 9, 70, 0.2) 55%, rgba(5, 9, 70, 0) 80%); }
   .hero-ic { position: relative; z-index: 1; display: grid; gap: 16px; padding-block: 160px 48px; }
   .hero h1 { font-size: clamp(36px, 7vw, 76px); line-height: 1; font-weight: 700; letter-spacing: -0.03em; max-width: 14ch; }
-  .hero-vizyon { font-size: clamp(18px, 2.2vw, 22px); line-height: 1.45; color: rgba(250, 248, 245, 0.9); max-width: 40ch; }
-  .hero .etiket { color: rgba(250, 248, 245, 0.85); }
+  .hero-vizyon { font-size: clamp(18px, 2.2vw, 22px); line-height: 1.45; color: rgba(255, 255, 255, 0.9); max-width: 40ch; }
+  .hero .etiket { color: rgba(255, 255, 255, 0.85); }
+  /* Kapakta ana buton, Işık sitesindeki "Aday Öğrenci" butonu gibi turuncu. */
+  .hero .btn--ana { background: var(--turuncu); border-color: var(--turuncu); color: var(--vurgu-koyu); }
+  .hero .btn--ana:hover { background: #FF9A3D; border-color: #FF9A3D; }
   .satir { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
   .btn--cam { color: #FFFFFF; background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .btn--cam:hover { background: rgba(255, 255, 255, 0.18); border-color: #FFFFFF; }
 
   .serit { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 0; margin-top: 32px; border-block: 1px solid var(--cizgi); color: var(--ikincil); font-size: 15px; }
-  .serit-nokta { width: 8px; height: 8px; border-radius: 50%; background: var(--yesil); box-shadow: 0 0 0 4px rgba(46, 158, 107, 0.16); }
+  .serit-nokta { width: 8px; height: 8px; border-radius: 50%; background: var(--yesil); box-shadow: 0 0 0 4px rgba(43, 125, 115, 0.16); }
 
   .katil { display: grid; gap: 28px; padding-block: 24px 72px; align-items: center; }
   .katil-foto { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; }

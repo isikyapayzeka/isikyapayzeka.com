@@ -33,7 +33,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   <meta property="og:url" content={kanonik} />
   <meta property="og:type" content="website" />
   <meta property="og:image" content={new URL("/img/kulup-logo.png", Astro.site).href} />
-  <meta name="theme-color" content="#FAF8F5" />
+  <meta name="theme-color" content="#0A118E" />
   <link rel="icon" href="/img/kulup-logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -129,23 +129,25 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
 </html>
 
 <style is:global>
-  /* QR link sayfasıyla aynı renkler: krem zemin, koyu mürekkep yazı, deri kahvesi vurgu. */
+  /* Işık Üniversitesi sitesinin renkleri (isikun.edu.tr): lacivert #0A118E ana renk,
+     açık gri zemin, beyaz kartlar, turuncu #FF8717 vurgu (sitedeki "Aday Öğrenci" butonu). */
   :root {
-    --zemin: #FAF8F5;
-    --zemin-2: #F3EFE9;
+    --zemin: #F4F4F4;
+    --zemin-2: #ECECEC;
     --kart: #FFFFFF;
     --yuzey: #FFFFFF;
-    --yuzey-hover: #F3EFE9;
-    --cizgi: rgba(26, 23, 21, 0.10);
-    --yazi: #1A1715;
-    --ikincil: #4A433D;
-    --soluk: #6B635C;
-    --vurgu: #8A5A2B;
-    --vurgu-koyu: #74491F;
-    --yesil: #2E9E6B;
-    --koyu: #1A1715;
-    --golge: 0 0 0 1px rgba(26, 23, 21, 0.07), 0 1px 2px -1px rgba(26, 23, 21, 0.08), 0 2px 6px 0 rgba(26, 23, 21, 0.04);
-    --golge-hover: 0 0 0 1px rgba(26, 23, 21, 0.10), 0 2px 4px -1px rgba(26, 23, 21, 0.10), 0 6px 14px -2px rgba(26, 23, 21, 0.08);
+    --yuzey-hover: #ECECEC;
+    --cizgi: rgba(33, 37, 41, 0.10);
+    --yazi: #212529;
+    --ikincil: #495057;
+    --soluk: #6C757D;
+    --vurgu: #0A118E;
+    --vurgu-koyu: #070C66;
+    --turuncu: #FF8717;
+    --yesil: #2B7D73;
+    --koyu: #0A118E;
+    --golge: 0 0 0 1px rgba(33, 37, 41, 0.06), 0 1px 2px -1px rgba(33, 37, 41, 0.08), 0 2px 6px 0 rgba(33, 37, 41, 0.04);
+    --golge-hover: 0 0 0 1px rgba(10, 17, 142, 0.18), 0 2px 4px -1px rgba(33, 37, 41, 0.10), 0 8px 18px -4px rgba(10, 17, 142, 0.18);
     --f-baslik: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
     --f-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     --kap: 1120px;
@@ -172,7 +174,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   a, summary, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   :focus-visible { outline: 2px solid var(--vurgu); outline-offset: 3px; border-radius: 4px; }
 
-  .atla { position: absolute; left: -999px; top: 8px; z-index: 30; background: var(--koyu); color: #FAF8F5; padding: 8px 12px; border-radius: 8px; }
+  .atla { position: absolute; left: -999px; top: 8px; z-index: 30; background: var(--koyu); color: #FFFFFF; padding: 8px 12px; border-radius: 8px; }
   .atla:focus { left: 16px; }
 
   .kap { width: 100%; max-width: var(--kap); margin-inline: auto; padding-inline: 20px; }
@@ -184,7 +186,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   .ikincil { color: var(--ikincil); }
 
   /* Üst bar */
-  .ust-bar { position: sticky; top: 0; z-index: 20; background: rgba(250, 248, 245, 0.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--cizgi); }
+  .ust-bar { position: sticky; top: 0; z-index: 20; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--cizgi); }
   .ust-ic { display: flex; align-items: center; gap: 16px; min-height: 64px; }
   .marka { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; font-size: 17px; margin-right: auto; }
   .marka img { width: 40px; height: 40px; }
@@ -207,7 +209,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
 
   /* Butonlar */
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 22px; border-radius: 12px; font: 600 16px/1.2 var(--f-baslik); text-decoration: none; border: 1px solid var(--cizgi); background: var(--yuzey); color: var(--yazi); transition: background-color 150ms ease-out, border-color 150ms ease-out, scale 150ms ease-out; }
-  .btn:hover { background: var(--yuzey-hover); border-color: rgba(26, 23, 21, 0.25); }
+  .btn:hover { background: var(--yuzey-hover); border-color: rgba(10, 17, 142, 0.35); }
   .btn:active { scale: 0.96; }
   .btn--ana { background: var(--vurgu); color: #FFFFFF; border-color: var(--vurgu-koyu); }
   .btn--ana:hover { background: var(--vurgu-koyu); border-color: var(--vurgu-koyu); }
@@ -217,7 +219,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   .bolum { padding-block: 56px; }
   .bolum-bas { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
   .bolum-bas--satir { flex-direction: row; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
-  .metin-link { color: var(--vurgu); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(138, 90, 43, 0.4); }
+  .metin-link { color: var(--vurgu); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(10, 17, 142, 0.35); }
   .metin-link:hover { color: var(--vurgu-koyu); }
   @media (min-width: 820px) { .bolum { padding-block: 80px; } }
 
@@ -247,7 +249,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   @media (prefers-reduced-motion: reduce) { .kart-gorsel img { transition: none; } .kart:hover .kart-gorsel img { scale: none; } }
 
   /* Alt bilgi */
-  .dip { --yazi: #FAF8F5; --ikincil: rgba(250, 248, 245, 0.72); --soluk: rgba(250, 248, 245, 0.5); --cizgi: rgba(250, 248, 245, 0.12); position: relative; z-index: 1; background: var(--koyu); color: var(--yazi); margin-top: 24px; }
+  .dip { --yazi: #FFFFFF; --ikincil: rgba(255, 255, 255, 0.78); --soluk: rgba(255, 255, 255, 0.55); --cizgi: rgba(255, 255, 255, 0.14); position: relative; z-index: 1; background: var(--koyu); color: var(--yazi); margin-top: 24px; }
   .dip-ic { display: grid; gap: 24px; padding-block: 40px; }
   .dip-marka { display: grid; gap: 10px; }
   .rozetler { display: flex; gap: 10px; }
@@ -261,6 +263,6 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   .dip-alt a { color: var(--soluk); }
   @media (min-width: 820px) { .dip-ic { grid-template-columns: 1fr auto; align-items: start; } .dip-alt { grid-column: 1 / -1; } }
 
-  .bildirim { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 40; max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 12px; background: var(--koyu); color: #FAF8F5; font-weight: 500; font-size: 14px; opacity: 0; translate: -50% 8px; pointer-events: none; transition: opacity 200ms ease-out, translate 200ms ease-out; overflow-wrap: anywhere; }
+  .bildirim { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 40; max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 12px; background: var(--koyu); color: #FFFFFF; font-weight: 500; font-size: 14px; opacity: 0; translate: -50% 8px; pointer-events: none; transition: opacity 200ms ease-out, translate 200ms ease-out; overflow-wrap: anywhere; }
   .bildirim.acik { opacity: 1; translate: -50% 0; }
 </style>
