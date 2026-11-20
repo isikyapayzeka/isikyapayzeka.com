@@ -1,0 +1,108 @@
+---
+// Köşelerde yavaşça kıpırdayan düğüm ağı (link sayfasının eski arka planından uyarlandı).
+// Bulunduğu kutunun boyutunu alır; kutu "position: relative" olmalı.
+interface Props {
+  renk: string; // "r, g, b"
+  koseler: ("sag-ust" | "sag-alt" | "sol-ust" | "sol-alt")[];
+  sinif?: string;
+}
+const { renk, koseler, sinif } = Astro.props;
+---
+<canvas class:list={["ag", sinif]} data-renk={renk} data-koseler={koseler.join(" ")} aria-hidden="true"></canvas>
+
+<script>
+  const YONLER: Record<string, [number, number, number, number]> = {
+    // [x köşesi (0 = sol, 1 = sağ), y köşesi (0 = üst, 1 = alt), x yönü, y yönü]
+    "sag-ust": [1, 0, -1, 1],
+    "sag-alt": [1, 1, -1, -1],
+    "sol-ust": [0, 0, 1, 1],
+    "sol-alt": [0, 1, 1, -1],
+  };
+  const hareketsiz = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  type Dugum = { kume: number; x0: number; y0: number; gx: number; gy: number; hz: number; faz: number; b: number; x: number; y: number };
+
+  function kur(c: HTMLCanvasElement) {
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    const renk = c.dataset.renk ?? "10, 17, 142";
+    const koseler = (c.dataset.koseler ?? "sag-ust").split(" ").filter((k) => YONLER[k]);
+    let W = 0, H = 0, D = 0, sonGenislik = -1;
+    let dugumler: Dugum[] = [];
+    let gorunur = false, kare = 0;
+
+    function olcu() {
+      const r = c.getBoundingClientRect();
+      if (Math.round(r.width) === sonGenislik && Math.abs(r.height - H) < 1) return false;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = r.width; H = r.height; sonGenislik = Math.round(W);
+      c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const R = Math.min(Math.max(W, H) * 0.32, W < 600 ? W * 0.55 : 380, H * 0.7);
+      D = R * 0.42;
+      const adet = W < 600 ? 11 : 17;
+      dugumler = [];
+      koseler.forEach((k, kume) => {
+        const [kx, ky, sx, sy] = YONLER[k];
+        for (let i = 0; i < adet; i++) {
+          const a = Math.random() * Math.PI / 2, r = R * Math.sqrt(Math.random());
+          dugumler.push({
+            kume,
+            x0: kx * W + sx * Math.cos(a) * r,
+            y0: ky * H + sy * Math.sin(a) * r,
+            gx: 6 + Math.random() * 10, gy: 6 + Math.random() * 10,
+            hz: 0.00012 + Math.random() * 0.00018, faz: Math.random() * 6.28,
+            b: Math.random() < 0.2 ? 2.4 : 1.3,
+            x: 0, y: 0,
+          });
+        }
+      });
+      return true;
+    }
+
+    function ciz(t: number) {
+      ctx!.clearRect(0, 0, W, H);
+      for (const n of dugumler) {
+        n.x = n.x0 + Math.sin(t * n.hz + n.faz) * n.gx;
+        n.y = n.y0 + Math.cos(t * n.hz * 0.8 + n.faz) * n.gy;
+      }
+      ctx!.lineWidth = 1;
+      for (let i = 0; i < dugumler.length; i++) {
+        for (let j = i + 1; j < dugumler.length; j++) {
+          const p = dugumler[i], q = dugumler[j];
+          if (p.kume !== q.kume) continue;
+          const d = Math.hypot(p.x - q.x, p.y - q.y);
+          if (d < D) {
+            ctx!.strokeStyle = `rgba(${renk}, ${(0.5 * (1 - d / D)).toFixed(3)})`;
+            ctx!.beginPath(); ctx!.moveTo(p.x, p.y); ctx!.lineTo(q.x, q.y); ctx!.stroke();
+          }
+        }
+      }
+      ctx!.fillStyle = `rgba(${renk}, 0.75)`;
+      for (const n of dugumler) { ctx!.beginPath(); ctx!.arc(n.x, n.y, n.b, 0, 6.283); ctx!.fill(); }
+    }
+
+    // Yalnızca ekranda görünürken ve hareket azaltma kapalıyken döner.
+    function dongu(t: number) {
+      ciz(t);
+      kare = gorunur && !hareketsiz.matches ? requestAnimationFrame(dongu) : 0;
+    }
+    function baslat() {
+      if (kare) return;
+      if (hareketsiz.matches) ciz(0);
+      else if (gorunur) kare = requestAnimationFrame(dongu);
+    }
+
+    olcu();
+    ciz(0);
+    new IntersectionObserver(([g]) => { gorunur = g.isIntersecting; baslat(); }).observe(c);
+    new ResizeObserver(() => { if (olcu()) { ciz(performance.now()); } }).observe(c);
+    hareketsiz.addEventListener?.("change", () => { cancelAnimationFrame(kare); kare = 0; baslat(); });
+  }
+
+  document.querySelectorAll<HTMLCanvasElement>("canvas.ag").forEach(kur);
+</script>
+
+<style>
+  .ag { position: absolute; pointer-events: none; display: block; }
+</style>

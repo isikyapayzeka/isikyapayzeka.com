@@ -12,7 +12,7 @@ const simdi = Date.now();
 const gecmis = (await etkinlikler(dil)).filter((e) => e.bitis.getTime() < simdi);
 const konuklar = gecmis.flatMap((e) => e.konuklar.map((k) => ({ k, etkinlik: e.baslik, gun: e.gunKisa, yil: e.baslangic.getFullYear() })));
 ---
-<Base dil={dil} sayfa="sirketler" baslik={M.sirketBaslik}>
+<Base dil={dil} sayfa="sirketler" baslik={M.sirketBaslik} ag>
   <section class="bolum kap giris">
     <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
     <h1>{M.sirketBaslik}</h1>

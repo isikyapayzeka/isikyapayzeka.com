@@ -1,6 +1,7 @@
 ---
 import { METIN, YOLLAR, yol, type Dil, type Sayfa } from "../i18n";
 import { ayarlar, epostaHref } from "../veri";
+import AgEfekti from "../components/AgEfekti.astro";
 
 interface Props {
   dil: Dil;
@@ -10,8 +11,9 @@ interface Props {
   // Etkinlik sayfası gibi YOLLAR dışındaki sayfalar için iki dildeki adres.
   alternatif?: { tr: string; en: string };
   gorsel?: string; // paylaşım önizlemesi (og:image) için site köküne göre yol
+  ag?: boolean; // sayfa başlığının sağ üstünde düğüm ağı
 }
-const { dil, sayfa, baslik, aciklama, alternatif, gorsel } = Astro.props;
+const { dil, sayfa, baslik, aciklama, alternatif, gorsel, ag = false } = Astro.props;
 const adres = (d: Dil) => (alternatif ? alternatif[d] : yol(sayfa, d));
 const M = METIN[dil];
 const A = await ayarlar();
@@ -68,10 +70,12 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   </header>
 
   <main id="icerik">
+    {ag && <AgEfekti renk="10, 17, 142" koseler={["sag-ust"]} sinif="ag--baslik" />}
     <slot />
   </main>
 
   <footer class="dip">
+    <AgEfekti renk="150, 185, 255" koseler={["sag-alt"]} sinif="ag--dip" />
     <div class="kap dip-ic">
       <div class="dip-marka">
         <div class="rozetler">
@@ -273,7 +277,11 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
 
   /* Alt bilgi */
   .dip { --yazi: #FFFFFF; --ikincil: rgba(255, 255, 255, 0.78); --soluk: rgba(255, 255, 255, 0.55); --cizgi: rgba(255, 255, 255, 0.14); position: relative; z-index: 1; background: var(--koyu); color: var(--yazi); margin-top: 24px; }
-  .dip-ic { display: grid; gap: 24px; padding-block: 40px; }
+  .dip-ic { position: relative; z-index: 1; display: grid; gap: 24px; padding-block: 40px; }
+  /* Düğüm ağı: başlıkta içeriğin arkasında, alt bilgide sağ alt köşede */
+  .ag--baslik { top: 0; left: 0; width: 100%; height: 380px; z-index: -1; opacity: 0.4; -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent); mask-image: linear-gradient(to bottom, #000 55%, transparent); }
+  .ag--dip { inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.55; }
+  @media (max-width: 640px) { .ag--baslik { height: 300px; opacity: 0.3; } }
   .dip-marka { display: grid; gap: 10px; }
   .rozetler { display: flex; gap: 10px; }
   .rozetler img { width: 44px; height: 44px; border-radius: 50%; }
