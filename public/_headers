@@ -1,0 +1,11 @@
+# Derlenen CSS/JS dosyalarının adı içeriğe göre değişir; tarayıcı bir yıl saklayabilir.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Takvim dosyaları ve link sayfasının veri dosyası arama sonuçlarında listelenmez.
+/takvim/*
+  X-Robots-Tag: noindex
+/en/calendar/*
+  X-Robots-Tag: noindex
+/link/etkinlikler.json
+  X-Robots-Tag: noindex

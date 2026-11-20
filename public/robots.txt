@@ -1,0 +1,7 @@
+# isikyapayzeka.com
+# Tüm arama motorları ve yapay zekâ asistanları (Googlebot, Bingbot, GPTBot, OAI-SearchBot,
+# ClaudeBot, PerplexityBot, Google-Extended vb.) sitenin tamamını tarayabilir.
+User-agent: *
+Allow: /
+
+Sitemap: https://isikyapayzeka.com/sitemap.xml

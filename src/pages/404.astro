@@ -1,0 +1,26 @@
+---
+// Var olmayan adreslerde gösterilir. Arama motorlarına listelenmez.
+import Base from "../layouts/Base.astro";
+import { METIN, yol } from "../i18n";
+const tr = METIN.tr;
+const en = METIN.en;
+---
+<Base dil="tr" sayfa="anasayfa" baslik={tr.bulunamadiBaslik} aciklama={tr.bulunamadiMetin} dizinleme={false}>
+  <section class="bolum kap bulunamadi">
+    <p class="etiket">404</p>
+    <h1>{tr.bulunamadiBaslik}</h1>
+    <p class="ikincil">{tr.bulunamadiMetin}</p>
+    <p class="ikincil" lang="en">{en.bulunamadiBaslik}. {en.bulunamadiMetin}</p>
+    <div class="satir">
+      <a class="btn btn--ana" href={yol("anasayfa", "tr")}>{tr.menu.anasayfa}</a>
+      <a class="btn" href={yol("etkinlikler", "tr")}>{tr.menu.etkinlikler}</a>
+      <a class="btn" href={yol("anasayfa", "en")} lang="en">{en.menu.anasayfa}</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .bulunamadi { display: grid; gap: 14px; padding-block: 96px; }
+  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.05; font-weight: 500; letter-spacing: -0.02em; }
+  .satir { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+</style>

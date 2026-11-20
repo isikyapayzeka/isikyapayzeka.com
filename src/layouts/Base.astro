@@ -1,4 +1,5 @@
 ---
+import { jsonLd, kulupSemasi, siteSemasi } from "../seo";
 import { METIN, YOLLAR, yol, type Dil, type Sayfa } from "../i18n";
 import { ayarlar, epostaHref } from "../veri";
 
@@ -7,6 +8,9 @@ interface Props {
   sayfa: Sayfa;
   baslik?: string;
   aciklama?: string;
+  gorselAlt?: string; // paylaşım görselinin metin karşılığı
+  sema?: Record<string, unknown>[]; // sayfaya özel yapısal veri (src/seo.ts)
+  dizinleme?: boolean; // false ise arama motorları sayfayı listelemez (404 sayfası)
   // Etkinlik sayfası gibi YOLLAR dışındaki sayfalar için iki dildeki adres.
   alternatif?: { tr: string; en: string };
   gorsel?: string; // paylaşım önizlemesi (og:image) için site köküne göre yol
@@ -16,9 +20,15 @@ const adres = (d: Dil) => (alternatif ? alternatif[d] : yol(sayfa, d));
 const M = METIN[dil];
 const A = await ayarlar();
 const digerDil: Dil = dil === "tr" ? "en" : "tr";
-const sayfaBasligi = baslik ? `${baslik} · ${M.kulup}` : M.kulup;
-const sayfaAciklamasi = aciklama ?? (dil === "en" ? A.vizyonEn : A.vizyon);
+const { gorselAlt, sema = [], dizinleme = true } = Astro.props;
+const sayfaBasligi = baslik ? `${baslik} · ${M.kulup}` : M.anaBaslik;
+const sayfaAciklamasi = aciklama ?? M.aciklamalar[sayfa];
 const kanonik = new URL(adres(dil), Astro.site).href;
+// Paylaşım görseli: sayfa kendi görselini vermezse ana sayfanın kapak fotoğrafı kullanılır.
+const kapak = A.kapak ? `/etkinlikler/${A.kapak}-1600.jpg` : "/img/kulup-logo.png";
+const paylasimGorseli = new URL(gorsel ?? kapak, Astro.site).href;
+const paylasimGorselAlt = gorsel ? gorselAlt : dil === "en" ? A.kapakAltEn : A.kapakAlt;
+const yapisalVeri = jsonLd([kulupSemasi(dil, A, Astro.site!), siteSemasi(dil, Astro.site!), ...sema]);
 const guncelleme = new Intl.DateTimeFormat(M.yerel, { timeZone: "Europe/Istanbul", day: "numeric", month: "long", year: "numeric" }).format(new Date());
 const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil), ad: M.menu[s] }));
 ---
@@ -29,14 +39,26 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>{sayfaBasligi}</title>
   <meta name="description" content={sayfaAciklamasi} />
-  <link rel="canonical" href={kanonik} />
-  <link rel="alternate" hreflang="tr" href={new URL(adres("tr"), Astro.site).href} />
-  <link rel="alternate" hreflang="en" href={new URL(adres("en"), Astro.site).href} />
+  <meta name="msvalidate.01" content="E5D866762DF6ABA7F13BBF0BFB30DC4F" />
+  <meta name="robots" content={dizinleme ? "index, follow, max-image-preview:large, max-snippet:-1" : "noindex"} />
+  {dizinleme && <link rel="canonical" href={kanonik} />}
+  {dizinleme && <link rel="alternate" hreflang="tr" href={new URL(adres("tr"), Astro.site).href} />}
+  {dizinleme && <link rel="alternate" hreflang="en" href={new URL(adres("en"), Astro.site).href} />}
+  {dizinleme && <link rel="alternate" hreflang="x-default" href={new URL(adres("tr"), Astro.site).href} />}
+  <meta property="og:site_name" content={M.kulup} />
+  <meta property="og:locale" content={dil === "en" ? "en_GB" : "tr_TR"} />
+  <meta property="og:locale:alternate" content={dil === "en" ? "tr_TR" : "en_GB"} />
   <meta property="og:title" content={sayfaBasligi} />
   <meta property="og:description" content={sayfaAciklamasi} />
   <meta property="og:url" content={kanonik} />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content={new URL(gorsel ?? "/img/kulup-logo.png", Astro.site).href} />
+  <meta property="og:image" content={paylasimGorseli} />
+  {paylasimGorselAlt && <meta property="og:image:alt" content={paylasimGorselAlt} />}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={sayfaBasligi} />
+  <meta name="twitter:description" content={sayfaAciklamasi} />
+  <meta name="twitter:image" content={paylasimGorseli} />
+  <script type="application/ld+json" set:html={yapisalVeri} />
   <meta name="theme-color" content="#0A118E" />
   <link rel="icon" href="/img/kulup-logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />

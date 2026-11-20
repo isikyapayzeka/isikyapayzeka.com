@@ -1,13 +1,23 @@
 ---
 import Base from "../layouts/Base.astro";
 import { METIN, type Dil } from "../i18n";
-import { ayarlar, ekip, epostaHref } from "../veri";
+import { ayarlar, ekip, epostaHref, etkinlikler } from "../veri";
 
 interface Props { dil: Dil }
 const { dil } = Astro.props;
 const M = METIN[dil];
 const A = await ayarlar();
 const E = await ekip(dil);
+// Sık sorulan sorular: metindeki {…} yer tutucuları etkinlik verisinden doldurulur.
+const gecmis = (await etkinlikler(dil)).filter((e) => e.bitis.getTime() < Date.now());
+const ilk = gecmis.at(-1);
+const doldur = (m: string) =>
+  m
+    .replace("{ilkGun}", ilk?.gun ?? "")
+    .replace("{ilkEtkinlik}", ilk?.baslik ?? "")
+    .replace("{sayi}", String(gecmis.length))
+    .replace("{eposta}", A.eposta);
+const sss = M.sss.filter((x) => (ilk || !x.cevap.includes("{ilk")) && (A.eposta || !x.cevap.includes("{eposta}")));
 ---
 <Base dil={dil} sayfa="hakkimizda" baslik={M.hakkimizdaBaslik}>
   <section class="bolum kap giris">
@@ -62,6 +72,15 @@ const E = await ekip(dil);
     </section>
   )}
 
+  <section class="bolum kap" aria-labelledby="sss">
+    <div class="bolum-bas"><h2 id="sss">{M.sssBaslik}</h2></div>
+    <dl class="sss">
+      {sss.map((x) => (
+        <div><dt>{x.soru}</dt><dd class="ikincil">{doldur(x.cevap)}</dd></div>
+      ))}
+    </dl>
+  </section>
+
   <section class="bolum kap" aria-labelledby="iletisim">
     <div class="bolum-bas"><h2 id="iletisim">{M.iletisim}</h2></div>
     <dl class="iletisim">
@@ -94,6 +113,11 @@ const E = await ekip(dil);
   .bas-harf { display: grid; place-items: center; background: var(--zemin-2); border: 1px solid var(--cizgi); font: 600 20px/1 var(--f-etiket); color: var(--ikincil); }
   .ekip li > div { display: grid; gap: 2px; min-width: 0; }
   .ekip h3 a { text-decoration: none; }
+
+  .sss { margin: 0; display: grid; border-top: 1px solid var(--cizgi); }
+  .sss div { display: grid; gap: 6px; padding-block: 20px; border-bottom: 1px solid var(--cizgi); }
+  .sss dt { font-weight: 600; font-size: 17px; }
+  .sss dd { margin: 0; max-width: 68ch; }
 
   .iletisim { display: grid; gap: 0; margin: 0; border-top: 1px solid var(--cizgi); }
   .iletisim div { display: grid; grid-template-columns: 120px 1fr; gap: 16px; padding-block: 16px; border-bottom: 1px solid var(--cizgi); align-items: baseline; }
