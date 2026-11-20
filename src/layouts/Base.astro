@@ -76,7 +76,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
       <div class="dip-marka">
         <div class="rozetler">
           <img src="/img/isik-logo.png" alt={dil === "en" ? "Işık University logo" : "Işık Üniversitesi logosu"} width="44" height="44" />
-          <img src="/img/kulup-logo.png" alt="" width="44" height="44" />
+          <img src="/img/kulup-logo-mavi.png" alt="" width="44" height="44" />
         </div>
         <p class="dip-ad">{M.kulup}</p>
         <p class="etiket">{(dil === "en" ? "Şile Campus" : "Şile Kampüsü").toLocaleUpperCase(dil)} · {A.donem}</p>
@@ -277,7 +277,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   .dip-marka { display: grid; gap: 10px; }
   .rozetler { display: flex; gap: 10px; }
   .rozetler img { width: 44px; height: 44px; border-radius: 50%; }
-  .rozetler img:first-child { background: var(--yazi); padding: 2px; }
+  .rozetler img { background: var(--yazi); padding: 2px; }
   .dip-ad { font-weight: 600; font-size: 17px; }
   .dip-linkler { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
   .dip-linkler a { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--yazi); background: rgba(255, 255, 255, 0.1); transition: background-color 150ms ease-out; }
