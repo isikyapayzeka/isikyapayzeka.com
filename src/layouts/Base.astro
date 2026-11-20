@@ -1,0 +1,285 @@
+---
+import { METIN, YOLLAR, yol, type Dil, type Sayfa } from "../i18n";
+import { ayarlar, epostaHref } from "../veri";
+
+interface Props {
+  dil: Dil;
+  sayfa: Sayfa;
+  baslik?: string;
+  aciklama?: string;
+  // Etkinlik sayfası gibi YOLLAR dışındaki sayfalar için iki dildeki adres.
+  alternatif?: { tr: string; en: string };
+  gorsel?: string; // paylaşım önizlemesi (og:image) için site köküne göre yol
+}
+const { dil, sayfa, baslik, aciklama, alternatif, gorsel } = Astro.props;
+const adres = (d: Dil) => (alternatif ? alternatif[d] : yol(sayfa, d));
+const M = METIN[dil];
+const A = await ayarlar();
+const digerDil: Dil = dil === "tr" ? "en" : "tr";
+const sayfaBasligi = baslik ? `${baslik} · ${M.kulup}` : M.kulup;
+const sayfaAciklamasi = aciklama ?? (dil === "en" ? A.vizyonEn : A.vizyon);
+const kanonik = new URL(adres(dil), Astro.site).href;
+const guncelleme = new Intl.DateTimeFormat(M.yerel, { timeZone: "Europe/Istanbul", day: "numeric", month: "long", year: "numeric" }).format(new Date());
+const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil), ad: M.menu[s] }));
+---
+<!doctype html>
+<html lang={dil}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>{sayfaBasligi}</title>
+  <meta name="description" content={sayfaAciklamasi} />
+  <link rel="canonical" href={kanonik} />
+  <link rel="alternate" hreflang="tr" href={new URL(adres("tr"), Astro.site).href} />
+  <link rel="alternate" hreflang="en" href={new URL(adres("en"), Astro.site).href} />
+  <meta property="og:title" content={sayfaBasligi} />
+  <meta property="og:description" content={sayfaAciklamasi} />
+  <meta property="og:url" content={kanonik} />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content={new URL(gorsel ?? "/img/kulup-logo.png", Astro.site).href} />
+  <meta name="theme-color" content="#0A118E" />
+  <link rel="icon" href="/img/kulup-logo.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" />
+</head>
+<body>
+  <a class="atla" href="#icerik">{dil === "en" ? "Skip to content" : "İçeriğe geç"}</a>
+
+  <header class="ust-bar">
+    <div class="kap ust-ic">
+      <a class="marka" href={yol("anasayfa", dil)} aria-label={M.kulup}>
+        <img src="/img/kulup-logo-mavi.png" alt="" width="40" height="40" />
+        <span>{M.kulupKisa}</span>
+      </a>
+      <nav class="menu" aria-label={M.menuAc}>
+        <details class="menu-mobil">
+          <summary aria-label={M.menuAc}><span></span><span></span></summary>
+          <ul>
+            {menu.map((m) => <li><a href={m.href} aria-current={m.s === sayfa ? "page" : undefined}>{m.ad}</a></li>)}
+          </ul>
+        </details>
+        <ul class="menu-genis">
+          {menu.filter((m) => m.s !== "anasayfa").map((m) => <li><a href={m.href} aria-current={m.s === sayfa ? "page" : undefined}>{m.ad}</a></li>)}
+        </ul>
+      </nav>
+      <a class="dil" href={adres(digerDil)} hreflang={digerDil} lang={digerDil}>{M.digerDil}</a>
+    </div>
+  </header>
+
+  <main id="icerik">
+    <slot />
+  </main>
+
+  <footer class="dip">
+    <div class="kap dip-ic">
+      <div class="dip-marka">
+        <div class="rozetler">
+          <img src="/img/isik-logo.png" alt={dil === "en" ? "Işık University logo" : "Işık Üniversitesi logosu"} width="44" height="44" />
+          <img src="/img/kulup-logo.png" alt="" width="44" height="44" />
+        </div>
+        <p class="dip-ad">{M.kulup}</p>
+        <p class="etiket">{(dil === "en" ? "Şile Campus" : "Şile Kampüsü").toLocaleUpperCase(dil)} · {A.donem}</p>
+      </div>
+      <ul class="dip-linkler">
+        {A.instagram && <li><a href={A.instagram}>Instagram</a></li>}
+        {A.linkedin && <li><a href={A.linkedin}>LinkedIn</a></li>}
+        {A.whatsapp && <li><a href={A.whatsapp}>{M.whatsapp}</a></li>}
+        {A.eposta && <li><a href={epostaHref(A.eposta)} data-kopya={A.eposta}>{A.eposta}</a></li>}
+        <li><a href="/link/">{M.linkSayfasi}</a></li>
+      </ul>
+      <p class="dip-alt">
+        {M.sonGuncelleme}: {guncelleme} ·
+        <a href="https://github.com/isikyapayzeka/isikyapayzeka.com/issues/new">{M.hataBildir}</a>
+      </p>
+    </div>
+  </footer>
+
+  <div class="bildirim" role="status" aria-live="polite"></div>
+
+  <script is:inline define:vars={{ kopyalandiMetni: M.kopyalandi }}>
+    // E-posta linkleri: e-posta uygulaması açılmasa bile adres panoya kopyalanır.
+    const bildirim = document.querySelector(".bildirim");
+    let zaman;
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest("[data-kopya]");
+      if (!a) return;
+      const adres = a.getAttribute("data-kopya");
+      const goster = (m) => {
+        bildirim.textContent = m;
+        bildirim.classList.add("acik");
+        clearTimeout(zaman);
+        zaman = setTimeout(() => bildirim.classList.remove("acik"), 3200);
+      };
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(adres).then(() => goster(`${adres} · ${kopyalandiMetni}`), () => goster(adres));
+      else goster(adres);
+    });
+
+    // Etkinlikler build sırasında ayrılır; site yeniden derlenmeden tarihi geçen etkinlik
+    // "yaklaşan" listesinden kalkar, "geçmiş" listesinde görünür.
+    const simdi = Date.now();
+    document.querySelectorAll("[data-bitis]").forEach((el) => {
+      const gecti = Date.parse(el.getAttribute("data-bitis")) < simdi;
+      if (el.hasAttribute("data-yaklasan") && gecti) el.hidden = true;
+      if (el.hasAttribute("data-gecmis-bekliyor") && gecti) el.hidden = false;
+    });
+    document.querySelectorAll("[data-bos-ise-goster]").forEach((el) => {
+      const liste = document.getElementById(el.getAttribute("data-bos-ise-goster"));
+      if (liste && !liste.querySelector("[data-bitis]:not([hidden])")) el.hidden = false;
+    });
+  </script>
+
+</body>
+</html>
+
+<style is:global>
+  /* Işık Üniversitesi sitesinin renkleri (isikun.edu.tr): lacivert #0A118E ana renk,
+     açık gri zemin, beyaz kartlar, turuncu #FF8717 vurgu (sitedeki "Aday Öğrenci" butonu). */
+  :root {
+    --zemin: #F4F4F4;
+    --zemin-2: #ECECEC;
+    --kart: #FFFFFF;
+    --yuzey: #FFFFFF;
+    --yuzey-hover: #ECECEC;
+    --cizgi: rgba(33, 37, 41, 0.10);
+    --yazi: #212529;
+    --ikincil: #495057;
+    --soluk: #6C757D;
+    --vurgu: #0A118E;
+    --vurgu-koyu: #070C66;
+    --turuncu: #FF8717;
+    --yesil: #2B7D73;
+    --koyu: #0A118E;
+    --golge: 0 0 0 1px rgba(33, 37, 41, 0.06), 0 1px 2px -1px rgba(33, 37, 41, 0.08), 0 2px 6px 0 rgba(33, 37, 41, 0.04);
+    --golge-hover: 0 0 0 1px rgba(10, 17, 142, 0.18), 0 2px 4px -1px rgba(33, 37, 41, 0.10), 0 8px 18px -4px rgba(10, 17, 142, 0.18);
+    /* Işık Üniversitesi sitesindeki yazı tipleri: metin Poppins, başlıklar Space Grotesk. */
+    --f-govde: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --f-baslik: "Space Grotesk", "Poppins", system-ui, sans-serif;
+    --f-etiket: "Poppins", system-ui, sans-serif;
+    --kap: 1120px;
+    color-scheme: light;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--zemin);
+    color: var(--yazi);
+    font: 400 16px/1.6 var(--f-govde);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  main { flex: 1 0 auto; position: relative; z-index: 1; }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  [hidden] { display: none !important; }
+  a, summary, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 2px solid var(--vurgu); outline-offset: 3px; border-radius: 4px; }
+
+  .atla { position: absolute; left: -999px; top: 8px; z-index: 30; background: var(--koyu); color: #FFFFFF; padding: 8px 12px; border-radius: 8px; }
+  .atla:focus { left: 16px; }
+
+  .kap { width: 100%; max-width: var(--kap); margin-inline: auto; padding-inline: 20px; }
+  .etiket { font: 500 12px/1.4 var(--f-etiket); letter-spacing: 0.1em; color: var(--ikincil); margin: 0; text-transform: none; }
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+  h1, h2 { font-family: var(--f-baslik); }
+  h2 { font-size: clamp(26px, 4vw, 36px); font-weight: 500; line-height: 1.15; letter-spacing: -0.01em; }
+  h3 { font-size: 19px; font-weight: 600; line-height: 1.3; }
+  p { margin: 0; }
+  .ikincil { color: var(--ikincil); }
+
+  /* Üst bar */
+  .ust-bar { position: sticky; top: 0; z-index: 20; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--cizgi); }
+  .ust-ic { display: flex; align-items: center; gap: 12px; min-height: 64px; }
+  .marka { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; font-size: 15px; white-space: nowrap; margin-right: auto; }
+  @media (max-width: 359px) { .marka span { display: none; } }
+  @media (min-width: 820px) { .ust-ic { gap: 16px; } .marka { font-size: 17px; } }
+  .marka img { width: 40px; height: 40px; }
+  .menu ul { list-style: none; margin: 0; padding: 0; }
+  .menu-genis { display: none; gap: 4px; }
+  .menu-genis a, .menu-mobil a { display: block; text-decoration: none; padding: 8px 12px; border-radius: 8px; color: var(--ikincil); font-weight: 500; }
+  .menu-genis a:hover, .menu-mobil a:hover { color: var(--yazi); background: var(--zemin-2); }
+  .menu a[aria-current="page"] { color: var(--yazi); }
+  .menu-mobil summary { list-style: none; cursor: pointer; width: 44px; height: 44px; display: grid; place-content: center; gap: 6px; border-radius: 10px; border: 1px solid var(--cizgi); }
+  .menu-mobil summary::-webkit-details-marker { display: none; }
+  .menu-mobil summary span { display: block; width: 18px; height: 2px; background: var(--yazi); border-radius: 2px; }
+  .menu-mobil[open] ul { position: absolute; left: 0; right: 0; top: 64px; background: var(--zemin-2); border-bottom: 1px solid var(--cizgi); padding: 8px 20px 16px; }
+  .menu-mobil[open] a { padding: 12px 8px; font-size: 17px; }
+  .dil { text-decoration: none; font: 500 13px/1 var(--f-etiket); letter-spacing: 0.06em; color: var(--ikincil); border: 1px solid var(--cizgi); border-radius: 999px; padding: 10px 14px; min-height: 40px; display: inline-flex; align-items: center; }
+  .dil:hover { color: var(--yazi); border-color: var(--soluk); }
+  @media (min-width: 820px) {
+    .menu-mobil { display: none; }
+    .menu-genis { display: flex; }
+  }
+
+  /* Butonlar */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 22px; border-radius: 12px; font: 600 16px/1.2 var(--f-govde); text-decoration: none; border: 1px solid var(--cizgi); background: var(--yuzey); color: var(--yazi); transition: background-color 150ms ease-out, border-color 150ms ease-out, scale 150ms ease-out; }
+  .btn:hover { background: var(--yuzey-hover); border-color: rgba(10, 17, 142, 0.35); }
+  .btn:active { scale: 0.96; }
+  .btn--ana { background: var(--vurgu); color: #FFFFFF; border-color: var(--vurgu-koyu); }
+  .btn--ana:hover { background: var(--vurgu-koyu); border-color: var(--vurgu-koyu); }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:active { scale: none; } }
+
+  /* Bölümler */
+  .bolum { padding-block: 56px; }
+  .bolum-bas { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .bolum-bas--satir { flex-direction: row; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
+  .metin-link { color: var(--vurgu); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(10, 17, 142, 0.35); }
+  .metin-link:hover { color: var(--vurgu-koyu); }
+  @media (min-width: 820px) { .bolum { padding-block: 80px; } }
+
+  /* Etkinlik kartları */
+  .kartlar { display: grid; gap: 14px; grid-template-columns: 1fr; list-style: none; margin: 0; padding: 0; }
+  @media (min-width: 720px) { .kartlar { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1040px) { .kartlar--uc { grid-template-columns: repeat(3, 1fr); } }
+  /* Kartın tamamı başlıktaki linke tıklar; kayıt butonu bunun üstünde kalır. */
+  .kart { position: relative; display: flex; flex-direction: column; border-radius: 16px; background: var(--kart); box-shadow: var(--golge); min-width: 0; transition: box-shadow 150ms ease-out; }
+  .kart:hover { box-shadow: var(--golge-hover); }
+  .kart--yaklasan { box-shadow: 0 0 0 2px var(--vurgu), var(--golge); }
+  .kart-gorsel { position: relative; aspect-ratio: 4 / 3; background: var(--zemin-2); overflow: hidden; border-radius: 16px 16px 0 0; }
+  .kart-gorsel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: scale 300ms ease-out; }
+  .kart:hover .kart-gorsel img { scale: 1.03; }
+  /* Afiş kırpılmaz: kutu afişin kendi oranını alır. */
+  .kart-gorsel--afis { aspect-ratio: auto; }
+  .kart-gorsel--afis img { position: static; height: auto; }
+  /* Yaklaşan etkinlik afişliyse geniş ekranda afiş solda, bilgiler sağda. */
+  @media (min-width: 720px) {
+    .kart--yan { grid-column: 1 / -1; flex-direction: row; align-items: stretch; }
+    .kart--yan .kart-gorsel { flex: 0 0 min(42%, 400px); align-self: start; border-radius: 16px 0 0 16px; }
+    .kart--yan .kart-govde { padding: 28px 32px; justify-content: center; }
+  }
+  .kart-gorsel .kart-logo { inset: 0; margin: auto; width: 96px; height: 96px; object-fit: contain; opacity: 0.6; }
+  .kart-govde { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 22px; flex: 1; }
+  .kart-ust { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 500 12.5px/1.4 var(--f-etiket); letter-spacing: 0.04em; color: var(--vurgu); }
+  .kart-ust span { color: var(--soluk); }
+  .kart h3 a { text-decoration: none; }
+  .kart h3 a::after { content: ""; position: absolute; inset: 0; }
+  .kart:hover h3 a { text-decoration: underline; text-underline-offset: 4px; }
+  .kart-ozet { color: var(--ikincil); font-size: 15px; }
+  .kart-konuk { font-size: 14px; }
+  .kart-alt-bilgi { font-size: 13.5px; color: var(--soluk); }
+  .kart-eylem { position: relative; z-index: 1; margin-top: auto; padding-top: 6px; display: flex; flex-wrap: wrap; gap: 10px; align-items: start; }
+  @media (prefers-reduced-motion: reduce) { .kart-gorsel img { transition: none; } .kart:hover .kart-gorsel img { scale: none; } }
+
+  /* Alt bilgi */
+  .dip { --yazi: #FFFFFF; --ikincil: rgba(255, 255, 255, 0.78); --soluk: rgba(255, 255, 255, 0.55); --cizgi: rgba(255, 255, 255, 0.14); position: relative; z-index: 1; background: var(--koyu); color: var(--yazi); margin-top: 24px; }
+  .dip-ic { display: grid; gap: 24px; padding-block: 40px; }
+  .dip-marka { display: grid; gap: 10px; }
+  .rozetler { display: flex; gap: 10px; }
+  .rozetler img { width: 44px; height: 44px; border-radius: 50%; }
+  .rozetler img:first-child { background: var(--yazi); padding: 2px; }
+  .dip-ad { font-weight: 600; font-size: 17px; }
+  .dip-linkler { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .dip-linkler a { color: var(--ikincil); text-decoration: none; padding-block: 6px; display: inline-block; }
+  .dip-linkler a:hover { color: var(--yazi); }
+  .dip-alt { font: 400 12px/1.6 var(--f-etiket); color: var(--soluk); }
+  .dip-alt a { color: var(--soluk); }
+  @media (min-width: 820px) { .dip-ic { grid-template-columns: 1fr auto; align-items: start; } .dip-alt { grid-column: 1 / -1; } }
+
+  .bildirim { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 40; max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 12px; background: var(--koyu); color: #FFFFFF; font-weight: 500; font-size: 14px; opacity: 0; translate: -50% 8px; pointer-events: none; transition: opacity 200ms ease-out, translate 200ms ease-out; overflow-wrap: anywhere; }
+  .bildirim.acik { opacity: 1; translate: -50% 0; }
+</style>

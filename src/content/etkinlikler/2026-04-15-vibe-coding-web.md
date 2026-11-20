@@ -1,0 +1,24 @@
+---
+baslik: "Vibe Coding ile Geleceğin Web Sitesini Tasarla"
+baslikEn: "Design the Website of the Future with Vibe Coding"
+tarih: "2026-04-15"
+saat: "16:30"
+bitis: "18:30"
+yer: "Şile Kampüsü, LMF 316"
+yerEn: "Şile Campus, LMF 316"
+tur: atolye
+konuklar: []
+ortaklar: ["hsd-isik", "lavazza"]
+ozet: "2040'tan bir fikri sınırlı sürede tek sayfalık bir web sitesine dönüştürdük."
+ozetEn: "Participants turned an idea from 2040 into a one-page website in limited time."
+link: "https://www.instagram.com/p/DXNQHTKCh81/"
+gorsel: "vibe-sunum"
+gorselAlt: "Katılımcılar atölyede tasarladıkları web sitesini perdede sunuyor"
+gorselAltEn: "Participants presenting the website they built during the workshop"
+galeri:
+  - "vibe-coding-1"
+  - "vibe-coding-2"
+  - "vibe-coding-3"
+  - "vibe-coding-4"
+  - "vibe-coding-5"
+---

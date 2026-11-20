@@ -1,0 +1,16 @@
+# Sitenin genel ayarları. Değerleri çift tırnak içinde değiştirin.
+# Boş bırakılan ("") link sitede görünmez.
+site:
+  donem: "2026–27"
+  vizyon: "Her bölümden öğrenciyi yapay zekâyla tanıştırıyor, birlikte öğrenip üretiyoruz."
+  vizyonEn: "We bring students from every department into AI, and we learn and build together."
+  uyeFormu: "https://docs.google.com/forms/d/e/1FAIpQLSfyKHyn7KWq-kwDwRFX5pAIYeXwL_LhzmlcdvTtLT-10yxuIw/viewform"
+  ekipBasvuru: "https://docs.google.com/forms/d/e/1FAIpQLSdxFy3pZjEHC3CO97WHIhYqM9jI5IU7_qQWqwebC1aC02J1RQ/viewform"
+  whatsapp: "https://chat.whatsapp.com/HB1TwXGpkvHEZXRJMXosk5"
+  instagram: "https://www.instagram.com/isikyapayzeka"
+  linkedin: "https://www.linkedin.com/company/isikdsai"
+  eposta: "veribilimi@isik.edu.tr"
+  konum: "https://www.google.com/maps/search/?api=1&query=I%C5%9F%C4%B1k+%C3%9Cniversitesi+%C5%9Eile+Kamp%C3%BCs%C3%BC"
+  kapak: "microsoft-grup"
+  kapakAlt: "Microsoft Kariyer Sohbeti'nin ardından katılımcılarla toplu fotoğraf"
+  kapakAltEn: "Group photo with attendees after the Microsoft Career Talk"

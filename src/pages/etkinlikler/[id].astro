@@ -1,0 +1,10 @@
+---
+import EtkinlikDetay from "../../views/EtkinlikDetay.astro";
+import { etkinlikler } from "../../veri";
+
+export async function getStaticPaths() {
+  return (await etkinlikler("tr")).map((e) => ({ params: { id: e.id }, props: { e } }));
+}
+const { e } = Astro.props;
+---
+<EtkinlikDetay dil="tr" e={e} />

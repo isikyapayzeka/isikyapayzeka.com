@@ -1,0 +1,139 @@
+---
+import Base from "../layouts/Base.astro";
+import EtkinlikKarti from "../components/EtkinlikKarti.astro";
+import OrtakSeridi from "../components/OrtakSeridi.astro";
+import { METIN, yol, type Dil } from "../i18n";
+import { ayarlar, etkinlikler, rakamlar } from "../veri";
+
+interface Props { dil: Dil }
+const { dil } = Astro.props;
+const M = METIN[dil];
+const A = await ayarlar();
+const tumu = await etkinlikler(dil);
+const simdi = Date.now();
+const yaklasan = tumu.filter((e) => e.bitis.getTime() >= simdi).reverse();
+// Son etkinlikler: fotoğraflı olanlar önce, en yeni üç tanesi.
+const gecmis = tumu.filter((e) => e.bitis.getTime() < simdi);
+const son = [...gecmis.filter((e) => e.gorsel && !e.afis), ...gecmis.filter((e) => !e.gorsel || e.afis)].slice(0, 3);
+const kapak = A.kapak ? `/etkinlikler/${A.kapak}` : "";
+// Rakamlar build sırasında veriden sayılır; sayfaya düz metin olarak yazılır.
+const R = await rakamlar();
+---
+<Base dil={dil} sayfa="anasayfa">
+  <section class="hero">
+    {kapak && (
+      <img
+        class="hero-foto"
+        src={`${kapak}-1600.jpg`}
+        srcset={`${kapak}-800.jpg 800w, ${kapak}-1600.jpg 1600w`}
+        sizes="100vw"
+        alt={dil === "en" ? A.kapakAltEn : A.kapakAlt}
+        width="1600"
+        height="1067"
+        fetchpriority="high"
+      />
+    )}
+    <div class="kap hero-ic">
+      <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
+      <h1>{M.kulup}</h1>
+      <p class="hero-vizyon">{dil === "en" ? A.vizyonEn : A.vizyon}</p>
+      <div class="satir">
+        {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
+        <a class="btn btn--cam" href={yol("etkinlikler", dil)}>{M.tumEtkinlikler}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="kap rakamlar" aria-label={dil === "en" ? "The club in numbers" : "Rakamlarla kulüp"}>
+    <dl>
+      {M.rakamlar.map((r) => (
+        <div><dt>{r.etiket}</dt><dd>{R[r.anahtar as keyof typeof R]}</dd></div>
+      ))}
+    </dl>
+  </section>
+
+  {yaklasan.length > 0 && (
+    <section class="bolum kap" aria-labelledby="siradaki">
+      <div class="bolum-bas"><h2 id="siradaki">{M.siradaki}</h2></div>
+      <ul class="kartlar" id="yaklasan-liste">
+        {yaklasan.slice(0, 2).map((e) => <EtkinlikKarti e={e} dil={dil} durum="yaklasan" />)}
+      </ul>
+    </section>
+  )}
+  <div class="kap">
+    <p class="serit" data-bos-ise-goster="yaklasan-liste" hidden={yaklasan.length > 0}>
+      <span class="serit-nokta" aria-hidden="true"></span>
+      <span>{M.siradakiYok}</span>
+      {A.whatsapp && <a class="metin-link" href={A.whatsapp}>{M.whatsapp} →</a>}
+    </p>
+  </div>
+
+  <section class="bolum kap" aria-labelledby="son">
+    <div class="bolum-bas bolum-bas--satir">
+      <h2 id="son">{M.sonEtkinlikler}</h2>
+      <a class="metin-link" href={yol("etkinlikler", dil)}>{M.tumEtkinlikler} →</a>
+    </div>
+    <ul class="kartlar kartlar--uc">
+      {son.map((e) => <EtkinlikKarti e={e} dil={dil} />)}
+    </ul>
+  </section>
+
+  <section class="kap ortak-bolum">
+    <OrtakSeridi dil={dil} />
+  </section>
+
+  <section class="kap katil" aria-labelledby="kimler">
+    <img
+      class="katil-foto"
+      src="/etkinlikler/genai-sinif-800.jpg"
+      srcset="/etkinlikler/genai-sinif-800.jpg 800w, /etkinlikler/genai-sinif-1600.jpg 1600w"
+      sizes="(min-width: 900px) 540px, 100vw"
+      alt={dil === "en" ? "Students working at computers during a workshop" : "Atölyede bilgisayar başında çalışan öğrenciler"}
+      width="800"
+      height="600"
+      loading="lazy"
+    />
+    <div class="katil-metin">
+      <h2 id="kimler">{M.kimler}</h2>
+      <p class="ikincil">{M.kimlerMetin}</p>
+      <div class="satir">
+        {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
+        {A.ekipBasvuru && <a class="btn" href={A.ekipBasvuru}>{M.ekibeKatil}</a>}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Kapak: tam genişlikte etkinlik fotoğrafı, yazı altta lacivert geçişin üstünde. */
+  .hero { position: relative; color: #FFFFFF; background: var(--koyu); display: grid; align-items: end; min-height: min(78vh, 760px); overflow: hidden; }
+  .hero-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 9, 70, 0.05) 0%, rgba(5, 9, 70, 0.4) 45%, rgba(5, 9, 70, 0.9) 100%), linear-gradient(90deg, rgba(5, 9, 70, 0.65) 0%, rgba(5, 9, 70, 0.2) 55%, rgba(5, 9, 70, 0) 80%); }
+  .hero-ic { position: relative; z-index: 1; display: grid; gap: 16px; padding-block: 160px 48px; }
+  .hero h1 { font-size: clamp(36px, 7vw, 76px); line-height: 1; font-weight: 600; letter-spacing: -0.03em; max-width: 14ch; }
+  .hero-vizyon { font-size: clamp(18px, 2.2vw, 22px); line-height: 1.45; color: rgba(255, 255, 255, 0.9); max-width: 40ch; }
+  .hero .etiket { color: rgba(255, 255, 255, 0.85); }
+  /* Kapakta ana buton, Işık sitesindeki "Aday Öğrenci" butonu gibi turuncu. */
+  .hero .btn--ana { background: var(--turuncu); border-color: var(--turuncu); color: var(--vurgu-koyu); }
+  .hero .btn--ana:hover { background: #FF9A3D; border-color: #FF9A3D; }
+  .satir { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+  .btn--cam { color: #FFFFFF; background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .btn--cam:hover { background: rgba(255, 255, 255, 0.18); border-color: #FFFFFF; }
+
+  .rakamlar { margin-top: -44px; position: relative; z-index: 2; }
+  .rakamlar dl { margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); background: var(--kart); border-radius: 16px; box-shadow: var(--golge-hover); }
+  .rakamlar div { display: flex; flex-direction: column-reverse; align-items: center; gap: 2px; padding: 18px 8px; text-align: center; }
+  .rakamlar div + div { border-left: 1px solid var(--cizgi); }
+  .rakamlar dd { margin: 0; font: 500 clamp(30px, 5vw, 44px)/1 var(--f-baslik); color: var(--vurgu); }
+  .rakamlar dt { font-size: 13px; color: var(--ikincil); }
+  .ortak-bolum { padding-block: 8px 48px; }
+
+  .serit { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 0; margin-top: 32px; border-block: 1px solid var(--cizgi); color: var(--ikincil); font-size: 15px; }
+  .serit-nokta { width: 8px; height: 8px; border-radius: 50%; background: var(--yesil); box-shadow: 0 0 0 4px rgba(43, 125, 115, 0.16); }
+
+  .katil { display: grid; gap: 28px; padding-block: 24px 72px; align-items: center; }
+  .katil-foto { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; }
+  .katil-metin { display: grid; gap: 14px; }
+  .katil-metin p { max-width: 46ch; font-size: 17px; }
+  @media (min-width: 900px) { .katil { grid-template-columns: 1fr 1fr; gap: 56px; padding-block: 40px 96px; } }
+</style>

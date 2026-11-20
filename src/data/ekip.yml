@@ -1,0 +1,14 @@
+# Yönetim ekibi. Liste boşken sitede "Ekip" bölümü görünmez.
+# Kişiyi eklemeden önce onayını alın. Fotoğraf isteğe bağlıdır:
+# fotoğrafı public/ekip/ klasörüne yükleyip dosya adını "foto" alanına yazın.
+#
+# Örnek:
+# - id: ad-soyad
+#   ad: "Ad Soyad"
+#   rol: "Başkan"
+#   rolEn: "President"
+#   bolum: "Bilgisayar Mühendisliği"
+#   bolumEn: "Computer Engineering"
+#   linkedin: "https://www.linkedin.com/in/..."
+#   foto: "ad-soyad.jpg"
+[]

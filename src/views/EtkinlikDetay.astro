@@ -1,0 +1,204 @@
+---
+// Tek bir etkinliğin sayfası: ana görsel, bilgiler, kayıt ve takvim butonları, fotoğraf galerisi.
+import Base from "../layouts/Base.astro";
+import { METIN, yol, type Dil } from "../i18n";
+import TakvimMenusu from "../components/TakvimMenusu.astro";
+import { etkinlikYolu, type Etkinlik } from "../veri";
+
+interface Props { dil: Dil; e: Etkinlik }
+const { dil, e } = Astro.props;
+const M = METIN[dil];
+const yaklasan = e.bitis.getTime() >= Date.now();
+const g = e.gorsel ? `/etkinlikler/${e.gorsel}` : "";
+const ogGorsel = g ? (e.afis ? `${g}.jpg` : `${g}-1600.jpg`) : undefined;
+const bilgiler = [
+  { etiket: M.tarihEtiket, deger: `${e.gun}, ${e.haftaGunu}` },
+  { etiket: M.saatEtiket, deger: e.saat },
+  { etiket: M.yerEtiket, deger: e.yer },
+  { etiket: M.konuk, deger: e.konuklar.join(", ") },
+  { etiket: M.ortak, deger: e.ortaklar.join(", ") },
+].filter((b) => b.deger);
+const sosyal = e.link.includes("linkedin.com") ? "LinkedIn" : e.link.includes("instagram.com") ? "Instagram" : "";
+---
+<Base
+  dil={dil}
+  sayfa="etkinlikler"
+  baslik={e.baslik}
+  aciklama={e.ozet || undefined}
+  alternatif={{ tr: etkinlikYolu(e.id, "tr"), en: etkinlikYolu(e.id, "en") }}
+  gorsel={ogGorsel}
+>
+  <article class="kap detay">
+    <a class="geri metin-link" href={yol("etkinlikler", dil)}>← {M.tumEtkinlikler}</a>
+
+    <div class="ust">
+      <div class:list={["ana-gorsel", { "ana-gorsel--afis": e.afis, "ana-gorsel--bos": !g }]}>
+        {g && e.afis && e.afisBoyut && <img src={`${g}.jpg`} alt={e.gorselAlt} width={e.afisBoyut.en} height={e.afisBoyut.boy} fetchpriority="high" />}
+        {g && !e.afis && (
+          <img
+            src={`${g}-1600.jpg`}
+            srcset={`${g}-800.jpg 800w, ${g}-1600.jpg 1600w`}
+            sizes="(min-width: 900px) 560px, 100vw"
+            alt={e.gorselAlt}
+            width="1600"
+            height="1200"
+            fetchpriority="high"
+          />
+        )}
+        {!g && <img src="/img/kulup-logo-mavi.png" alt="" width="120" height="120" />}
+      </div>
+
+      <div class="bilgi">
+        <p class="tur">{e.tur}</p>
+        <h1>{e.baslik}</h1>
+        {e.ozet && <p class="ozet">{e.ozet}</p>}
+        <dl class="liste">
+          {bilgiler.map((b) => <div><dt>{b.etiket}</dt><dd>{b.deger}</dd></div>)}
+        </dl>
+
+        {yaklasan && (
+          <div class="eylemler" data-bitis={e.bitisIso} data-yaklasan>
+            {e.kayitLinki && <a class="btn btn--ana" href={e.kayitLinki}>{M.kayitOl}</a>}
+            <TakvimMenusu e={e} dil={dil} />
+          </div>
+        )}
+        {e.link && <p><a class="metin-link" href={e.link}>{sosyal ? `${sosyal}: ${M.detay}` : M.detay} →</a></p>}
+      </div>
+    </div>
+
+    {e.galeri.length > 0 && (
+      <section class="galeri-bolum" aria-labelledby="fotograflar">
+        <h2 id="fotograflar">{M.fotograflar}</h2>
+        <ul class="galeri">
+          {e.galeri.map((ad, i) => (
+            <li>
+              <a href={`/etkinlikler/galeri/${ad}-buyuk.jpg`}>
+                <img src={`/etkinlikler/galeri/${ad}-800.jpg`} alt={`${e.baslik}, ${M.fotografN} ${i + 1}`} loading="lazy" decoding="async" />
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <!-- Fotoğraf görüntüleyici: küçük resme tıklanınca açılır; oklar, klavye ve kaydırma ile gezilir. -->
+        <dialog class="izleyici" aria-label={M.fotograflar}>
+          <img class="izleyici-foto" alt="" />
+          <p class="izleyici-sayac" aria-live="polite"></p>
+          <button type="button" class="izleyici-btn izleyici-kapat" aria-label={dil === "en" ? "Close" : "Kapat"}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+          <button type="button" class="izleyici-btn izleyici-onceki" aria-label={dil === "en" ? "Previous photo" : "Önceki fotoğraf"}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+          </button>
+          <button type="button" class="izleyici-btn izleyici-sonraki" aria-label={dil === "en" ? "Next photo" : "Sonraki fotoğraf"}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </dialog>
+      </section>
+    )}
+  </article>
+</Base>
+
+<script>
+  const dlg = document.querySelector<HTMLDialogElement>(".izleyici");
+  const linkler = [...document.querySelectorAll<HTMLAnchorElement>(".galeri a")];
+  if (dlg && linkler.length) {
+    const foto = dlg.querySelector<HTMLImageElement>(".izleyici-foto")!;
+    const sayac = dlg.querySelector<HTMLElement>(".izleyici-sayac")!;
+    const tekFoto = linkler.length < 2;
+    dlg.querySelectorAll<HTMLElement>(".izleyici-onceki, .izleyici-sonraki").forEach((b) => (b.hidden = tekFoto));
+    let simdiki = 0;
+
+    const goster = (i: number) => {
+      simdiki = (i + linkler.length) % linkler.length;
+      const a = linkler[simdiki];
+      foto.src = a.href;
+      foto.alt = a.querySelector("img")?.alt ?? "";
+      sayac.textContent = `${simdiki + 1} / ${linkler.length}`;
+      // Bir sonraki fotoğrafı önceden yükle.
+      new Image().src = linkler[(simdiki + 1) % linkler.length].href;
+    };
+
+    linkler.forEach((a, i) =>
+      a.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        goster(i);
+        dlg.showModal();
+      }),
+    );
+    dlg.querySelector(".izleyici-kapat")!.addEventListener("click", () => dlg.close());
+    dlg.querySelector(".izleyici-onceki")!.addEventListener("click", () => goster(simdiki - 1));
+    dlg.querySelector(".izleyici-sonraki")!.addEventListener("click", () => goster(simdiki + 1));
+    // Fotoğrafın dışındaki koyu alana tıklayınca kapanır.
+    dlg.addEventListener("click", (ev) => { if (ev.target === dlg) dlg.close(); });
+    dlg.addEventListener("keydown", (ev) => {
+      if (tekFoto) return;
+      if (ev.key === "ArrowLeft") goster(simdiki - 1);
+      if (ev.key === "ArrowRight") goster(simdiki + 1);
+    });
+    // Dokunmatik ekranda sağa/sola kaydırma.
+    let basX = 0, basY = 0;
+    dlg.addEventListener("touchstart", (ev) => { basX = ev.touches[0].clientX; basY = ev.touches[0].clientY; }, { passive: true });
+    dlg.addEventListener("touchend", (ev) => {
+      const dx = ev.changedTouches[0].clientX - basX, dy = ev.changedTouches[0].clientY - basY;
+      if (!tekFoto && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) goster(simdiki + (dx < 0 ? 1 : -1));
+    });
+    dlg.addEventListener("close", () => linkler[simdiki].focus());
+  }
+</script>
+
+<style>
+  .detay { padding-block: 32px 80px; display: grid; gap: 28px; }
+  .geri { justify-self: start; font-size: 15px; }
+
+  .ust { display: grid; gap: 28px; align-items: start; }
+  @media (min-width: 900px) { .ust { grid-template-columns: minmax(0, 560px) 1fr; gap: 48px; } }
+
+  .ana-gorsel { border-radius: 16px; overflow: hidden; background: var(--zemin-2); box-shadow: var(--golge); }
+  .ana-gorsel img { width: 100%; height: auto; }
+  .ana-gorsel:not(.ana-gorsel--afis) img { aspect-ratio: 4 / 3; object-fit: cover; }
+  .ana-gorsel--afis { justify-self: center; max-width: 480px; width: 100%; }
+  .ana-gorsel--bos { aspect-ratio: 4 / 3; display: grid; place-items: center; }
+  .ana-gorsel--bos img { width: 120px; aspect-ratio: auto; opacity: 0.6; }
+
+  .bilgi { display: grid; gap: 18px; align-content: start; }
+  .tur { font: 500 13px/1.4 var(--f-etiket); letter-spacing: 0.08em; text-transform: uppercase; color: var(--vurgu); }
+  h1 { font-size: clamp(30px, 4.6vw, 46px); line-height: 1.1; font-weight: 500; letter-spacing: -0.02em; }
+  .ozet { font-size: 18px; color: var(--ikincil); max-width: 52ch; }
+
+  .liste { margin: 0; display: grid; border-top: 1px solid var(--cizgi); }
+  .liste div { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding-block: 12px; border-bottom: 1px solid var(--cizgi); }
+  .liste dt { font: 500 13px/1.6 var(--f-etiket); color: var(--soluk); }
+  .liste dd { margin: 0; min-width: 0; }
+
+  .eylemler { display: flex; flex-wrap: wrap; gap: 10px; align-items: start; }
+
+  .galeri-bolum { display: grid; gap: 20px; margin-top: 24px; }
+  .galeri { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+  .galeri a { display: block; border-radius: 12px; overflow: hidden; background: var(--zemin-2); }
+  .galeri img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: scale 300ms ease-out; }
+  .galeri a:hover img { scale: 1.03; }
+  @media (prefers-reduced-motion: reduce) { .galeri img { transition: none; } .galeri a:hover img { scale: none; } }
+
+  .izleyici { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(5, 9, 40, 0.97); color: #FFFFFF; }
+  .izleyici[open] { display: grid; place-items: center; }
+  .izleyici::backdrop { background: transparent; }
+  :global(html:has(dialog[open])) { overflow: hidden; }
+  .izleyici-foto { max-width: calc(100vw - 32px); max-height: calc(100dvh - 120px); width: auto; height: auto; object-fit: contain; border-radius: 8px; }
+  .izleyici-sayac { position: absolute; top: 22px; left: 50%; translate: -50% 0; font: 500 14px/1 var(--f-etiket); color: rgba(255, 255, 255, 0.8); }
+  .izleyici-btn { position: absolute; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.14); color: #FFFFFF; cursor: pointer; appearance: none; transition: background-color 150ms ease-out; }
+  .izleyici-btn:hover { background: rgba(255, 255, 255, 0.26); }
+  .izleyici-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .izleyici-btn[hidden] { display: none; }
+  .izleyici-kapat { top: 12px; right: 12px; }
+  .izleyici-onceki, .izleyici-sonraki { top: 50%; translate: 0 -50%; }
+  .izleyici-onceki { left: 12px; }
+  .izleyici-sonraki { right: 12px; }
+  /* Telefonda oklar fotoğrafın altında, başparmak hizasında. */
+  @media (max-width: 640px) {
+    .izleyici-foto { max-height: calc(100dvh - 180px); }
+    .izleyici-onceki, .izleyici-sonraki { top: auto; bottom: 24px; translate: none; }
+    .izleyici-onceki { left: calc(50% - 64px); }
+    .izleyici-sonraki { right: calc(50% - 64px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .izleyici-btn { transition: none; } }
+</style>
