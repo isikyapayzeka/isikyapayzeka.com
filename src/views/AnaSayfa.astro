@@ -2,7 +2,6 @@
 import Base from "../layouts/Base.astro";
 import EtkinlikKarti from "../components/EtkinlikKarti.astro";
 import OrtakSeridi from "../components/OrtakSeridi.astro";
-import AgEfekti from "../components/AgEfekti.astro";
 import { METIN, yol, type Dil } from "../i18n";
 import { ayarlar, etkinlikler, rakamlar } from "../veri";
 
@@ -20,7 +19,7 @@ const kapak = A.kapak ? `/etkinlikler/${A.kapak}` : "";
 // Rakamlar build sırasında veriden sayılır; sayfaya düz metin olarak yazılır.
 const R = await rakamlar();
 ---
-<Base dil={dil} sayfa="anasayfa">
+<Base dil={dil} sayfa="anasayfa" ag>
   <section class="hero">
     {kapak && (
       <img
@@ -34,7 +33,6 @@ const R = await rakamlar();
         fetchpriority="high"
       />
     )}
-    <AgEfekti renk="200, 220, 255" koseler={["sag-ust"]} sinif="ag--hero" oran={0.34} />
     <div class="kap hero-ic">
       <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
       <h1>{M.kulup}</h1>
@@ -81,7 +79,6 @@ const R = await rakamlar();
   </section>
 
   <section class="kap ortak-bolum">
-    <AgEfekti renk="10, 17, 142" koseler={["sag-ust"]} sinif="ag--bolum" />
     <OrtakSeridi dil={dil} />
   </section>
 
@@ -129,7 +126,7 @@ const R = await rakamlar();
   .rakamlar div + div { border-left: 1px solid var(--cizgi); }
   .rakamlar dd { margin: 0; font: 500 clamp(30px, 5vw, 44px)/1 var(--f-baslik); color: var(--vurgu); }
   .rakamlar dt { font-size: 13px; color: var(--ikincil); }
-  .ortak-bolum { position: relative; padding-block: 8px 48px; }
+  .ortak-bolum { padding-block: 8px 48px; }
 
   .serit { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 0; margin-top: 32px; border-block: 1px solid var(--cizgi); color: var(--ikincil); font-size: 15px; }
   .serit-nokta { width: 8px; height: 8px; border-radius: 50%; background: var(--yesil); box-shadow: 0 0 0 4px rgba(43, 125, 115, 0.16); }

@@ -1,9 +1,10 @@
 ---
-// Köşelerde yavaşça kıpırdayan düğüm ağı (link sayfasının eski arka planından uyarlandı).
-// Bulunduğu kutunun boyutunu alır; kutu "position: relative" olmalı.
+// Yavaşça kıpırdayan düğüm ağı (link sayfasının eski arka planından uyarlandı).
+// Köşe kümeleri ya da "dagilim" ile bütün alana seyrek dağılmış tek ağ çizer.
+// Bulunduğu kutunun boyutunu alır.
 interface Props {
   renk: string; // "r, g, b"
-  koseler: ("sag-ust" | "sag-alt" | "sol-ust" | "sol-alt")[];
+  koseler: ("sag-ust" | "sag-alt" | "sol-ust" | "sol-alt" | "dagilim")[];
   sinif?: string;
   oran?: number; // kümenin yarıçapı en fazla kutu yüksekliğinin bu oranı kadar olur
 }
@@ -27,6 +28,7 @@ const { renk, koseler, sinif, oran = 0.7 } = Astro.props;
     const ctx = c.getContext("2d");
     if (!ctx) return;
     const renk = c.dataset.renk ?? "10, 17, 142";
+    const dagilim = c.dataset.koseler === "dagilim";
     const koseler = (c.dataset.koseler ?? "sag-ust").split(" ").filter((k) => YONLER[k]);
     const oran = Number(c.dataset.oran) || 0.7;
     let W = 0, H = 0, D = 0, sonGenislik = -1;
@@ -40,10 +42,26 @@ const { renk, koseler, sinif, oran = 0.7 } = Astro.props;
       W = r.width; H = r.height; sonGenislik = Math.round(W);
       c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      dugumler = [];
+      if (dagilim) {
+        // Seyrek, tek parça ağ: yoğunluk alana göre, komşular arası mesafe sabit.
+        D = W < 600 ? 130 : 180;
+        const adet = Math.max(12, Math.min(110, Math.round((W * H) / 16000)));
+        for (let i = 0; i < adet; i++) {
+          dugumler.push({
+            kume: 0,
+            x0: Math.random() * W, y0: Math.random() * H,
+            gx: 8 + Math.random() * 14, gy: 8 + Math.random() * 14,
+            hz: 0.0001 + Math.random() * 0.00015, faz: Math.random() * 6.28,
+            b: Math.random() < 0.2 ? 2.2 : 1.3,
+            x: 0, y: 0,
+          });
+        }
+        return true;
+      }
       const R = Math.min(Math.max(W, H) * 0.32, W < 600 ? W * 0.55 : 380, H * oran);
       D = R * 0.42;
       const adet = W < 600 ? 11 : 17;
-      dugumler = [];
       koseler.forEach((k, kume) => {
         const [kx, ky, sx, sy] = YONLER[k];
         for (let i = 0; i < adet; i++) {

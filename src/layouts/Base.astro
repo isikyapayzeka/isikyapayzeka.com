@@ -11,7 +11,7 @@ interface Props {
   // Etkinlik sayfası gibi YOLLAR dışındaki sayfalar için iki dildeki adres.
   alternatif?: { tr: string; en: string };
   gorsel?: string; // paylaşım önizlemesi (og:image) için site köküne göre yol
-  ag?: boolean; // sayfa başlığının sağ üstünde düğüm ağı
+  ag?: boolean; // içeriğin arkasında, boş alanlarda görünen düğüm ağı
 }
 const { dil, sayfa, baslik, aciklama, alternatif, gorsel, ag = false } = Astro.props;
 const adres = (d: Dil) => (alternatif ? alternatif[d] : yol(sayfa, d));
@@ -70,7 +70,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   </header>
 
   <main id="icerik">
-    {ag && <AgEfekti renk="10, 17, 142" koseler={["sag-ust"]} sinif="ag--baslik" />}
+    {ag && <AgEfekti renk="10, 17, 142" koseler={["dagilim"]} sinif="ag--sayfa" />}
     <slot />
   </main>
 
@@ -278,12 +278,13 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   /* Alt bilgi */
   .dip { --yazi: #FFFFFF; --ikincil: rgba(255, 255, 255, 0.78); --soluk: rgba(255, 255, 255, 0.55); --cizgi: rgba(255, 255, 255, 0.14); position: relative; z-index: 1; background: var(--koyu); color: var(--yazi); margin-top: 24px; }
   .dip-ic { position: relative; z-index: 1; display: grid; gap: 24px; padding-block: 40px; }
-  /* Düğüm ağı: başlıkta içeriğin arkasında, alt bilgide sağ alt köşede */
-  .ag--baslik { top: 0; left: 0; width: 100%; height: 380px; z-index: -1; opacity: 0.6; -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent); mask-image: linear-gradient(to bottom, #000 55%, transparent); }
+  /* Düğüm ağı. Sayfadakinin yeri sabit; kartlar opak olduğu için yalnızca boş alanlarda görünür,
+     kenarlarda daha belirgin, ortada daha soluktur. */
+  .ag.ag--sayfa { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: -1; opacity: 0.55;
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.45) 24%, rgba(0, 0, 0, 0.45) 76%, #000 100%);
+    mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.45) 24%, rgba(0, 0, 0, 0.45) 76%, #000 100%); }
   .ag--dip { inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.8; }
-  .ag--hero { inset: 0; width: 100%; height: 100%; z-index: 1; opacity: 1; }
-  .ag--bolum { top: -40px; left: 0; width: 100%; height: calc(100% + 40px); z-index: -1; opacity: 0.45; }
-  @media (max-width: 640px) { .ag--baslik { height: 300px; opacity: 0.45; } }
+  @media (max-width: 640px) { .ag.ag--sayfa { opacity: 0.4; -webkit-mask-image: none; mask-image: none; } }
   .dip-marka { display: grid; gap: 10px; }
   .rozetler { display: flex; gap: 10px; }
   .rozetler img { width: 44px; height: 44px; border-radius: 50%; }

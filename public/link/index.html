@@ -129,7 +129,7 @@ a, summary { touch-action: manipulation; -webkit-tap-highlight-color: transparen
 }
 
 /* ---- Başlık ---- */
-.kapak { position: relative; overflow: hidden; background: var(--koyu); color: #FFFFFF; }
+.kapak { position: relative; z-index: 1; overflow: hidden; background: var(--koyu); color: #FFFFFF; }
 .kapak-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
 .kapak::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 9, 70, 0.55) 0%, rgba(5, 9, 70, 0.72) 50%, rgba(5, 9, 70, 0.94) 100%); }
 .kapak-ic {
@@ -145,7 +145,8 @@ a, summary { touch-action: manipulation; -webkit-tap-highlight-color: transparen
   gap: 16px;
 }
 .kapak .etiket { color: rgba(255, 255, 255, 0.82); }
-.kapak-ag { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.75; pointer-events: none; }
+/* Düğüm ağı sayfanın arkasında sabit durur; fotoğraflı bandın ve kartların altında kalır, boş kenarlarda görünür */
+.sayfa-ag { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.45; pointer-events: none; }
 .rozetler { display: flex; gap: 14px; }
 .rozet {
   width: 60px;
@@ -435,9 +436,10 @@ a:focus-visible, summary:focus-visible, button:focus-visible { outline: 2px soli
 </head>
 <body>
 
+<canvas class="sayfa-ag" id="ag" aria-hidden="true"></canvas>
+
 <header class="baslik kapak">
   <img class="kapak-foto" src="/etkinlikler/microsoft-grup-800.jpg" srcset="/etkinlikler/microsoft-grup-800.jpg 800w, /etkinlikler/microsoft-grup-1600.jpg 1600w" sizes="100vw" alt="" width="800" height="600" fetchpriority="high">
-  <canvas class="kapak-ag" id="ag" aria-hidden="true"></canvas>
   <div class="kapak-ic">
     <button type="button" class="btn dil-btn" id="dil-btn" hidden>
       <span id="dil-bayrak-en" hidden><svg class="bayrak" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="uk-s2"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="uk-t2"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#uk-s2)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-t2)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg></span><span id="dil-bayrak-tr" hidden><svg class="bayrak" viewBox="0 0 1200 800" aria-hidden="true"><rect width="1200" height="800" fill="#E30A17"/><circle cx="425" cy="400" r="200" fill="#FFFFFF"/><circle cx="475" cy="400" r="160" fill="#E30A17"/><path fill="#FFFFFF" d="M583.334 400l180.901 58.779-111.804-153.885v190.212l111.804-153.885z"/></svg></span>
@@ -857,7 +859,7 @@ function dilKaydet(d) {
   });
   ekran.querySelector("[data-dil]").focus();
 })();
-// ---- Kapakta köşelerde kıpırdayan düğüm ağı ----
+// ---- Köşelerde kıpırdayan düğüm ağı (sayfanın arkasında) ----
 (function () {
   var c = document.getElementById("ag");
   if (!c || !c.getContext) return;
@@ -872,7 +874,7 @@ function dilKaydet(d) {
     W = r.width; H = r.height; sonGenislik = Math.round(W);
     c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var R = Math.min(Math.max(W, H) * 0.32, W < 600 ? W * 0.5 : 320, H * 0.8);
+    var R = Math.min(Math.max(W, H) * 0.32, W < 600 ? W * 0.55 : 420);
     D = R * 0.45;
     dugumler = [];
     var adet = W < 600 ? 11 : 16;
@@ -903,12 +905,12 @@ function dilKaydet(d) {
         if (p.kume !== q.kume) continue;
         var d = Math.hypot(p.x - q.x, p.y - q.y);
         if (d < D) {
-          ctx.strokeStyle = "rgba(170,200,255," + (0.5 * (1 - d / D)).toFixed(3) + ")";
+          ctx.strokeStyle = "rgba(10,17,142," + (0.5 * (1 - d / D)).toFixed(3) + ")";
           ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
         }
       }
     }
-    ctx.fillStyle = "rgba(170,200,255,0.8)";
+    ctx.fillStyle = "rgba(10,17,142,0.75)";
     dugumler.forEach(function (n) { ctx.beginPath(); ctx.arc(n.x, n.y, n.b, 0, 6.283); ctx.fill(); });
   }
 
