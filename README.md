@@ -178,7 +178,7 @@ Elle değiştirilebilecekler:
 - Arama sonuçlarında görünen sayfa başlığı ve açıklamaları: `src/i18n.ts` içindeki `anaBaslik` ve `aciklamalar`.
 - Hakkımızda sayfasındaki "Sık sorulan sorular": `src/i18n.ts` içindeki `sss`.
 
-**Silmeyin:** `public/googlecf6d553f1f75b751.html` (Google Search Console doğrulaması) ve `public/` içindeki 32 karakterlik `.txt` dosyası (IndexNow anahtarı; Bing'e yeni sayfaları bildirir). Silinirse doğrulama düşer.
+**Silmeyin:** `public/googlecf6d553f1f75b751.html` (Google Search Console doğrulaması), `public/BingSiteAuth.xml` (Bing Webmaster doğrulaması) ve `public/` içindeki 32 karakterlik `.txt` dosyası (IndexNow anahtarı; Bing'e yeni sayfaları bildirir). Silinirse doğrulama düşer.
 
 ## Notlar
 - Sayfa ilk açılışta dil sorar (Türkçe / English). Seçim o telefonda hatırlanır, sağ üstteki düğmeyle değiştirilebilir.

@@ -38,6 +38,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>{sayfaBasligi}</title>
   <meta name="description" content={sayfaAciklamasi} />
+  <meta name="msvalidate.01" content="E5D866762DF6ABA7F13BBF0BFB30DC4F" />
   <meta name="robots" content={dizinleme ? "index, follow, max-image-preview:large, max-snippet:-1" : "noindex"} />
   {dizinleme && <link rel="canonical" href={kanonik} />}
   {dizinleme && <link rel="alternate" hreflang="tr" href={new URL(adres("tr"), Astro.site).href} />}
