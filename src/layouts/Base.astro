@@ -279,9 +279,11 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   .dip { --yazi: #FFFFFF; --ikincil: rgba(255, 255, 255, 0.78); --soluk: rgba(255, 255, 255, 0.55); --cizgi: rgba(255, 255, 255, 0.14); position: relative; z-index: 1; background: var(--koyu); color: var(--yazi); margin-top: 24px; }
   .dip-ic { position: relative; z-index: 1; display: grid; gap: 24px; padding-block: 40px; }
   /* Düğüm ağı: başlıkta içeriğin arkasında, alt bilgide sağ alt köşede */
-  .ag--baslik { top: 0; left: 0; width: 100%; height: 380px; z-index: -1; opacity: 0.4; -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent); mask-image: linear-gradient(to bottom, #000 55%, transparent); }
-  .ag--dip { inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.55; }
-  @media (max-width: 640px) { .ag--baslik { height: 300px; opacity: 0.3; } }
+  .ag--baslik { top: 0; left: 0; width: 100%; height: 380px; z-index: -1; opacity: 0.6; -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent); mask-image: linear-gradient(to bottom, #000 55%, transparent); }
+  .ag--dip { inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.8; }
+  .ag--hero { inset: 0; width: 100%; height: 100%; z-index: 1; opacity: 1; }
+  .ag--bolum { top: -40px; left: 0; width: 100%; height: calc(100% + 40px); z-index: -1; opacity: 0.45; }
+  @media (max-width: 640px) { .ag--baslik { height: 300px; opacity: 0.45; } }
   .dip-marka { display: grid; gap: 10px; }
   .rozetler { display: flex; gap: 10px; }
   .rozetler img { width: 44px; height: 44px; border-radius: 50%; }

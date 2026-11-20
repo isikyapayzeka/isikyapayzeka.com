@@ -5,10 +5,11 @@ interface Props {
   renk: string; // "r, g, b"
   koseler: ("sag-ust" | "sag-alt" | "sol-ust" | "sol-alt")[];
   sinif?: string;
+  oran?: number; // kümenin yarıçapı en fazla kutu yüksekliğinin bu oranı kadar olur
 }
-const { renk, koseler, sinif } = Astro.props;
+const { renk, koseler, sinif, oran = 0.7 } = Astro.props;
 ---
-<canvas class:list={["ag", sinif]} data-renk={renk} data-koseler={koseler.join(" ")} aria-hidden="true"></canvas>
+<canvas class:list={["ag", sinif]} data-renk={renk} data-koseler={koseler.join(" ")} data-oran={oran} aria-hidden="true"></canvas>
 
 <script>
   const YONLER: Record<string, [number, number, number, number]> = {
@@ -27,6 +28,7 @@ const { renk, koseler, sinif } = Astro.props;
     if (!ctx) return;
     const renk = c.dataset.renk ?? "10, 17, 142";
     const koseler = (c.dataset.koseler ?? "sag-ust").split(" ").filter((k) => YONLER[k]);
+    const oran = Number(c.dataset.oran) || 0.7;
     let W = 0, H = 0, D = 0, sonGenislik = -1;
     let dugumler: Dugum[] = [];
     let gorunur = false, kare = 0;
@@ -38,7 +40,7 @@ const { renk, koseler, sinif } = Astro.props;
       W = r.width; H = r.height; sonGenislik = Math.round(W);
       c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const R = Math.min(Math.max(W, H) * 0.32, W < 600 ? W * 0.55 : 380, H * 0.7);
+      const R = Math.min(Math.max(W, H) * 0.32, W < 600 ? W * 0.55 : 380, H * oran);
       D = R * 0.42;
       const adet = W < 600 ? 11 : 17;
       dugumler = [];
