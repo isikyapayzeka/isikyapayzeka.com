@@ -21,6 +21,9 @@ const { renk, koseler, sinif, oran = 0.7 } = Astro.props;
     "sol-alt": [0, 1, 1, -1],
   };
   const hareketsiz = window.matchMedia("(prefers-reduced-motion: reduce)");
+  // Ağ bu öğelerin üstünden geçmez: kutularının çevresinde silinir, yazı okunur kalır.
+  const YAZI = "h1, h2, h3, h4, p, dt, dd, li, a, button, time, label, summary, figcaption, blockquote";
+  const PAY = 12;
 
   type Dugum = { kume: number; x0: number; y0: number; gx: number; gy: number; hz: number; faz: number; b: number; x: number; y: number };
 
@@ -34,6 +37,21 @@ const { renk, koseler, sinif, oran = 0.7 } = Astro.props;
     let W = 0, H = 0, D = 0, sonGenislik = -1;
     let dugumler: Dugum[] = [];
     let gorunur = false, kare = 0;
+    const kap = c.parentElement!;
+    let yazilar: Element[] = [];
+    let kutular: DOMRect[] = [];
+    let kirli = true;
+    function yazilariBul() { yazilar = Array.from(kap.querySelectorAll(YAZI)); kirli = true; }
+    function kutulariOlc() {
+      const cr = c.getBoundingClientRect();
+      kutular = [];
+      for (const el of yazilar) {
+        const r = el.getBoundingClientRect();
+        if (!r.width || r.bottom < cr.top - PAY || r.top > cr.bottom + PAY || r.right < cr.left - PAY || r.left > cr.right + PAY) continue;
+        kutular.push(new DOMRect(r.left - cr.left - PAY, r.top - cr.top - PAY, r.width + 2 * PAY, r.height + 2 * PAY));
+      }
+      kirli = false;
+    }
 
     function olcu() {
       const r = c.getBoundingClientRect();
@@ -100,6 +118,13 @@ const { renk, koseler, sinif, oran = 0.7 } = Astro.props;
       }
       ctx!.fillStyle = `rgba(${renk}, 0.75)`;
       for (const n of dugumler) { ctx!.beginPath(); ctx!.arc(n.x, n.y, n.b, 0, 6.283); ctx!.fill(); }
+      if (kirli) kutulariOlc();
+      if (kutular.length) {
+        ctx!.globalCompositeOperation = "destination-out";
+        ctx!.fillStyle = "#000";
+        for (const k of kutular) { ctx!.beginPath(); ctx!.roundRect(k.x, k.y, k.width, k.height, 10); ctx!.fill(); }
+        ctx!.globalCompositeOperation = "source-over";
+      }
     }
 
     // Yalnızca ekranda görünürken ve hareket azaltma kapalıyken döner.
@@ -114,9 +139,14 @@ const { renk, koseler, sinif, oran = 0.7 } = Astro.props;
     }
 
     olcu();
+    yazilariBul();
     ciz(0);
+    // Kaydırınca ve boyut değişince yazıların yeri yeniden ölçülür.
+    window.addEventListener("scroll", () => { kirli = true; if (hareketsiz.matches) ciz(0); }, { passive: true });
+    window.addEventListener("resize", yazilariBul);
+    document.fonts?.ready.then(() => { kirli = true; if (hareketsiz.matches || !kare) ciz(performance.now()); });
     new IntersectionObserver(([g]) => { gorunur = g.isIntersecting; baslat(); }).observe(c);
-    new ResizeObserver(() => { if (olcu()) { ciz(performance.now()); } }).observe(c);
+    new ResizeObserver(() => { kirli = true; olcu(); ciz(performance.now()); }).observe(c);
     hareketsiz.addEventListener?.("change", () => { cancelAnimationFrame(kare); kare = 0; baslat(); });
   }
 
