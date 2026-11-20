@@ -8,6 +8,7 @@ type Dugum = Record<string, unknown>;
 
 const KAMPUS = {
   "@type": "PostalAddress",
+  streetAddress: "Meşrutiyet Mahallesi, Üniversite Sokak No:2",
   addressLocality: "Şile",
   addressRegion: "İstanbul",
   postalCode: "34980",
