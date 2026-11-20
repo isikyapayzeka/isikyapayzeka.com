@@ -20,8 +20,9 @@ const CONFIG = {
 
   donem: "2026–27",
 
-  // ---- Yaklaşan etkinlik ----
-  // Etkinlik yoksa baslik alanını "" bırakın, kart gizlenir.
+  // ---- Sıradaki etkinlik ----
+  // Boş bırakılırsa sitedeki etkinlik listesinden sıradaki etkinlik kendiliğinden gösterilir.
+  // Burada başlık yazılırsa sitedeki yerine bu etkinlik gösterilir.
   // Tarihler Türkiye saatiyle, "YIL-AY-GÜN SAAT:DAKİKA" biçiminde yazılır.
   // Bitiş saati geçince kart kendiliğinden kalkar ve "Geçmiş etkinlikler"e taşınır.
   etkinlik: {
@@ -47,15 +48,10 @@ const CONFIG = {
   konum: "https://www.google.com/maps/search/?api=1&query=I%C5%9F%C4%B1k+%C3%9Cniversitesi+%C5%9Eile+Kamp%C3%BCs%C3%BC",
 
   // ---- Geçmiş etkinlikler ----
-  // Her etkinlik bir satır. link ve baslikEn boş olabilir. Örnek:
+  // Sitedeki geçmiş etkinlikler (src/content/etkinlikler) kendiliğinden listelenir.
+  // Buraya yalnızca sitede olmayan bir etkinliği eklemek için yazın. link ve baslikEn boş olabilir. Örnek:
   // { baslik: "Tanışma Buluşması", baslikEn: "Meet & Greet", tarih: "2026-10-08", link: "" },
   gecmisEtkinlikler: [
-    { baslik: "Welcome Etkinliği", baslikEn: "Welcome Event", tarih: "2026-10-08", link: "https://www.instagram.com/reel/DeSB0wgRbF-/" },
-    { baslik: "Generative AI Workshop", baslikEn: "Generative AI Workshop", tarih: "2026-04-30", link: "https://www.linkedin.com/feed/update/urn:li:activity:7458147902037794816/" },
-    { baslik: "AI Kariyer Yayını", baslikEn: "AI Career Livestream", tarih: "2026-04-24", link: "https://www.instagram.com/p/DXZdlK_ivr3/" },
-    { baslik: "Vibe Coding Atölyesi", baslikEn: "Vibe Coding Workshop", tarih: "2026-04-15", link: "https://www.instagram.com/p/DXNQHTKCh81/" },
-    { baslik: "Microsoft Kariyer Sohbeti", baslikEn: "Microsoft Career Talk", tarih: "2025-12-23", link: "https://www.linkedin.com/feed/update/urn:li:activity:7409618479672107008/" },
-    { baslik: "Veri Analizi Atölyesi", baslikEn: "Data Analysis Workshop", tarih: "2025-10-22", link: "https://www.linkedin.com/feed/update/urn:li:activity:7390070280234217473/" },
   ]
 
 };
@@ -209,12 +205,17 @@ h1 {
   flex-direction: column;
   gap: 14px;
 }
-.etkinlik > .etiket, .etkinlik h2, .etkinlik .bilgi { margin-inline: 8px; }
+.etkinlik .bilgi { margin-inline: 8px; }
+.e-ust { display: flex; gap: 14px; align-items: flex-start; margin-inline: 8px; }
+.e-baslik { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.e-gorsel { width: 84px; height: auto; flex: none; border-radius: 8px; box-shadow: var(--golge); }
+.etkinlik h2 a { color: inherit; text-decoration: none; }
+.etkinlik h2 a:hover { text-decoration: underline; text-decoration-color: rgba(10, 17, 142, 0.35); text-underline-offset: 4px; }
 .etkinlik .etiket { color: var(--vurgu); }
 .etkinlik h2 {
   font-family: var(--f-baslik);
-  font-size: 24px;
-  line-height: 1.15;
+  font-size: 21px;
+  line-height: 1.2;
   font-weight: 500;
   letter-spacing: -0.015em;
   margin-block: 0;
@@ -454,7 +455,13 @@ a:focus-visible, summary:focus-visible, button:focus-visible { outline: 2px soli
 <main class="sayfa">
 
   <section class="etkinlik" id="etkinlik" aria-labelledby="etkinlik-baslik" hidden>
-    <h2 id="etkinlik-baslik"></h2>
+    <div class="e-ust">
+      <img class="e-gorsel" id="e-gorsel" alt="" width="84" hidden>
+      <div class="e-baslik">
+        <p class="etiket" data-buyuk data-i18n="siradaki">Sıradaki etkinlik</p>
+        <h2 id="etkinlik-baslik"></h2>
+      </div>
+    </div>
     <dl class="bilgi">
       <div id="e-tarih-satir"><dt data-buyuk data-i18n="tarih">Tarih</dt><dd id="e-tarih"></dd></div>
       <div id="e-yer-satir"><dt data-buyuk data-i18n="yer">Yer</dt><dd id="e-yer"></dd></div>
@@ -556,7 +563,7 @@ var METIN = {
     sayfaAciklama: "Işık Yapay Zeka & Veri Bilimi Kulübü: etkinlikler, üyelik ve iletişim.",
     ust: "Işık Üniversitesi · Şile, İstanbul",
     ad: "Işık Yapay Zeka & Veri Bilimi Kulübü",
-    tarih: "Tarih", yer: "Yer", kayit: "Kayıt ol", takvim: "Takvime ekle", google: "Google Takvim",
+    siradaki: "Sıradaki etkinlik", tarih: "Tarih", yer: "Yer", kayit: "Kayıt ol", takvim: "Takvime ekle", google: "Google Takvim",
     uye: "Üye ol", whatsapp: "WhatsApp Topluluğu", eposta: "E-posta", gecmis: "Geçmiş etkinlikler",
     ekip: "Ekibe katıl", sponsor: "Sponsorluk ve iş birliği", kampus: "Şile Kampüsü", donem: "Şile Kampüsü",
     mailKonu: "Sponsorluk ve konuşmacı iş birliği", kopyalandi: " kopyalandı", kayitIcs: "Kayıt: ",
@@ -567,7 +574,7 @@ var METIN = {
     sayfaAciklama: "Işık Artificial Intelligence & Data Science Club: events, membership and contact.",
     ust: "IŞIK UNIVERSITY · ŞİLE, ISTANBUL",
     ad: "Işık Artificial Intelligence & Data Science Club",
-    tarih: "Date", yer: "Venue", kayit: "Register", takvim: "Add to calendar", google: "Google Calendar",
+    siradaki: "Next event", tarih: "Date", yer: "Venue", kayit: "Register", takvim: "Add to calendar", google: "Google Calendar",
     uye: "Become a member", whatsapp: "WhatsApp Community", eposta: "Email", gecmis: "Past events",
     ekip: "Join the team", sponsor: "Partner with us", kampus: "Şile Campus", donem: "ŞİLE CAMPUS",
     mailKonu: "Sponsorship and speaker partnership", kopyalandi: " copied", kayitIcs: "Registration: ",
@@ -603,7 +610,7 @@ function baslat(dil) {
     return m ? new Date(m[1] + "-" + m[2] + "-" + m[3] + "T12:00:00+03:00") : tarihSaat(s);
   }
   function hrefYap(v, konu) {
-    if (/^(https?:|mailto:)/i.test(v)) return v;
+    if (/^(https?:|mailto:)/i.test(v) || v.charAt(0) === "/") return v;
     if (v.indexOf("@") > 0 && v.indexOf("/") === -1) {
       return "mailto:" + v + (konu ? "?subject=" + encodeURIComponent(konu) : "");
     }
@@ -627,33 +634,62 @@ function baslat(dil) {
   var bas = tarihSaat(e.baslangic);
   var bit = tarihSaat(e.bitis) || (bas ? new Date(bas.getTime() + 2 * 3600 * 1000) : null);
 
-  if (baslikTr && bit && bit < bugun) {
-    gecmis.push({ baslik: baslikTr, baslikEn: temiz(e.baslikEn), tarih: temiz(e.baslangic).slice(0, 10), link: "" });
-  } else if (baslikTr) {
-    document.getElementById("etkinlik").hidden = false;
-    document.getElementById("etkinlik-baslik").textContent = baslik;
+  var utc = function (d) { return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, ""); };
 
-    if (bas) {
-      var gun = new Intl.DateTimeFormat(YEREL, { timeZone: TZ, day: "numeric", month: "long", weekday: "long" }).format(bas);
-      var saat = new Intl.DateTimeFormat(YEREL, { timeZone: TZ, hour: "2-digit", minute: "2-digit" }).format(bas);
+  // k: { baslik, bas, bit, yer, kayit, sayfa, gorsel, gorselAlt, ics, icsIndir, google }
+  function kartDoldur(k) {
+    document.getElementById("etkinlik").hidden = false;
+    var baslikEl = document.getElementById("etkinlik-baslik");
+    if (k.sayfa) {
+      var a = document.createElement("a");
+      a.href = k.sayfa;
+      a.textContent = k.baslik;
+      baslikEl.append(a);
+    } else {
+      baslikEl.textContent = k.baslik;
+    }
+
+    if (k.gorsel) {
+      var img = document.getElementById("e-gorsel");
+      img.src = k.gorsel;
+      img.alt = k.gorselAlt || "";
+      img.hidden = false;
+    }
+
+    if (k.bas) {
+      var gun = new Intl.DateTimeFormat(YEREL, { timeZone: TZ, day: "numeric", month: "long", weekday: "long" }).format(k.bas);
+      var saat = new Intl.DateTimeFormat(YEREL, { timeZone: TZ, hour: "2-digit", minute: "2-digit" }).format(k.bas);
       document.getElementById("e-tarih").textContent = gun + " · " + saat;
-    } else if (temiz(e.baslangic)) {
-      document.getElementById("e-tarih").textContent = temiz(e.baslangic);
+    } else if (k.tarihMetni) {
+      document.getElementById("e-tarih").textContent = k.tarihMetni;
     } else {
       document.getElementById("e-tarih-satir").hidden = true;
     }
 
-    var yer = temiz(sec(e.yer, e.yerEn));
-    if (yer) document.getElementById("e-yer").textContent = yer;
+    if (k.yer) document.getElementById("e-yer").textContent = k.yer;
     else document.getElementById("e-yer-satir").hidden = true;
 
-    var kayit = temiz(e.kayitLinki);
     var kayitEl = document.getElementById("e-kayit");
-    if (kayit) kayitEl.href = hrefYap(kayit);
+    if (k.kayit) kayitEl.href = hrefYap(k.kayit);
     else kayitEl.hidden = true;
 
+    if (k.ics && k.google) {
+      var icsEl = document.getElementById("e-ics");
+      icsEl.href = k.ics;
+      if (k.icsIndir) icsEl.setAttribute("download", k.icsIndir);
+      document.getElementById("e-google").href = k.google;
+    } else {
+      document.getElementById("e-takvim").hidden = true;
+    }
+  }
+
+  if (baslikTr && bit && bit < bugun) {
+    gecmis.push({ baslik: baslikTr, baslikEn: temiz(e.baslikEn), tarih: temiz(e.baslangic).slice(0, 10), link: "" });
+  } else if (baslikTr) {
+    var yer = temiz(sec(e.yer, e.yerEn));
+    var kayit = temiz(e.kayitLinki);
+    var k = { baslik: baslik, bas: bas, bit: bit, tarihMetni: temiz(e.baslangic), yer: yer, kayit: kayit };
     if (bas) {
-      var utc = function (d) { return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, ""); };
       var aciklama = [temiz(sec(e.aciklama, e.aciklamaEn)), kayit ? M.kayitIcs + kayit : ""].filter(Boolean).join("\n");
       var kac = function (s) { return s.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/([,;])/g, "\\$1"); };
       var ics = [
@@ -667,18 +703,40 @@ function baslat(dil) {
         aciklama ? "DESCRIPTION:" + kac(aciklama) : "",
         "END:VEVENT", "END:VCALENDAR"
       ].filter(Boolean).join("\r\n");
-      var icsEl = document.getElementById("e-ics");
-      icsEl.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
-      icsEl.setAttribute("download", "etkinlik.ics");
-
-      document.getElementById("e-google").href = "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+      k.ics = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
+      k.icsIndir = "etkinlik.ics";
+      k.google = "https://calendar.google.com/calendar/render?action=TEMPLATE" +
         "&text=" + encodeURIComponent(baslik) +
         "&dates=" + utc(bas) + "/" + utc(bit) +
         (yer ? "&location=" + encodeURIComponent(yer) : "") +
         (aciklama ? "&details=" + encodeURIComponent(aciklama) : "");
-    } else {
-      document.getElementById("e-takvim").hidden = true;
     }
+    kartDoldur(k);
+  }
+  // Sitedeki etkinlik listesi (src/content/etkinlikler) build sırasında bu dosyaya yazılır.
+  function siteVerisi(veri) {
+    var simdi = new Date();
+    var tumu = veri.etkinlikler || [];
+    var siradaki = tumu.filter(function (x) { return new Date(x.bitis) >= simdi; })[0];
+    if (siradaki && document.getElementById("etkinlik").hidden) {
+      var d = siradaki[dil] || siradaki.tr;
+      kartDoldur({
+        baslik: d.baslik, bas: new Date(siradaki.baslangic), bit: new Date(siradaki.bitis), yer: d.yer,
+        kayit: siradaki.kayitLinki, sayfa: d.sayfa, gorsel: siradaki.gorsel, gorselAlt: d.gorselAlt,
+        ics: d.takvim, google: d.google
+      });
+    }
+    gecmisCiz(tumu
+      .filter(function (x) { return new Date(x.bitis) < simdi; })
+      .map(function (x) { var d = x[dil] || x.tr; return { baslik: x.tr.baslik, gorunen: d.baslik, tarih: new Date(x.baslangic), link: d.sayfa }; }));
+  }
+  if (window.fetch) {
+    fetch("/link/etkinlikler.json")
+      .then(function (r) { return r.ok ? r.json() : { etkinlikler: [] }; })
+      .catch(function () { return { etkinlikler: [] }; })
+      .then(siteVerisi);
+  } else {
+    gecmisCiz([]);
   }
 
   // ---- Linkler: boş olan ya da daha önce eklenmiş olan gizlenir ----
@@ -721,36 +779,42 @@ function baslat(dil) {
   });
 
   // ---- Geçmiş etkinlikler ----
-  var liste = document.getElementById("gecmis-liste");
-  var OK_SVG = '<svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>';
-  var bicim = new Intl.DateTimeFormat(YEREL, { timeZone: TZ, day: "numeric", month: "short", year: "numeric" });
-  var gorulenEtkinlik = new Set();
-  gecmis
-    .map(function (g) { return { baslik: temiz(g.baslik), gorunen: temiz(sec(g.baslik, g.baslikEn)), tarih: sadeceTarih(g.tarih), link: temiz(g.link) }; })
-    .filter(function (g) {
-      if (!g.baslik) return false;
-      var anahtar = g.baslik.toLocaleLowerCase("tr") + "|" + (g.tarih ? g.tarih.toISOString().slice(0, 10) : "");
-      if (gorulenEtkinlik.has(anahtar)) return false;
-      gorulenEtkinlik.add(anahtar);
-      return true;
-    })
-    .sort(function (a, b) { return (b.tarih || 0) - (a.tarih || 0); })
-    .forEach(function (g) {
-      var li = document.createElement("li");
-      var t = document.createElement("time");
-      t.textContent = g.tarih ? bicim.format(g.tarih) : "";
-      var satir = document.createElement(g.link ? "a" : "div");
-      satir.className = "gecmis-satir";
-      if (g.link) satir.href = hrefYap(g.link);
-      var ad = document.createElement("span");
-      ad.className = "ad";
-      ad.textContent = g.gorunen;
-      satir.append(t, ad);
-      if (g.link) satir.insertAdjacentHTML("beforeend", OK_SVG);
-      li.append(satir);
-      liste.append(li);
+  // Aynı güne düşen iki kayıttan ilki kalır: önce sitedekiler, sonra CONFIG'dekiler gelir.
+  function gecmisCiz(siteden) {
+    var liste = document.getElementById("gecmis-liste");
+    var OK_SVG = '<svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>';
+    var bicim = new Intl.DateTimeFormat(YEREL, { timeZone: TZ, day: "numeric", month: "short", year: "numeric" });
+    var gunAnahtari = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" });
+    var gorulenGun = new Set();
+    var elle = gecmis.map(function (g) {
+      return { baslik: temiz(g.baslik), gorunen: temiz(sec(g.baslik, g.baslikEn)), tarih: sadeceTarih(g.tarih), link: temiz(g.link) };
     });
-  if (liste.children.length) document.getElementById("gecmis-kutu").hidden = false;
+    siteden.concat(elle)
+      .filter(function (g) {
+        if (!g.baslik) return false;
+        var anahtar = g.tarih ? gunAnahtari.format(g.tarih) : g.baslik.toLocaleLowerCase("tr");
+        if (gorulenGun.has(anahtar)) return false;
+        gorulenGun.add(anahtar);
+        return true;
+      })
+      .sort(function (a, b) { return (b.tarih || 0) - (a.tarih || 0); })
+      .forEach(function (g) {
+        var li = document.createElement("li");
+        var t = document.createElement("time");
+        t.textContent = g.tarih ? bicim.format(g.tarih) : "";
+        var satir = document.createElement(g.link ? "a" : "div");
+        satir.className = "gecmis-satir";
+        if (g.link) satir.href = hrefYap(g.link);
+        var ad = document.createElement("span");
+        ad.className = "ad";
+        ad.textContent = g.gorunen;
+        satir.append(t, ad);
+        if (g.link) satir.insertAdjacentHTML("beforeend", OK_SVG);
+        li.append(satir);
+        liste.append(li);
+      });
+    if (liste.children.length) document.getElementById("gecmis-kutu").hidden = false;
+  }
 
   // ---- Dil düğmesi: diğer dile geçer ----
   var dilBtn = document.getElementById("dil-btn");
