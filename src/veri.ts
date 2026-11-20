@@ -42,6 +42,7 @@ export async function etkinlikler(dil: Dil) {
   const M = METIN[dil];
   const ortakListe = await getCollection("ortaklar");
   const ortakAd = new Map(ortakListe.map((o) => [o.id, dil === "en" && o.data.adEn ? o.data.adEn : o.data.ad]));
+  const ortakLogo = new Map(ortakListe.map((o) => [o.id, o.data.logo]));
   const tumu = await getCollection("etkinlikler");
   return tumu
     .map(({ id, data: e }) => {
@@ -57,6 +58,7 @@ export async function etkinlikler(dil: Dil) {
         konuklar: e.konuklar,
         ortaklar: e.ortaklar.map((o) => ortakAd.get(o) ?? o),
         ortakIdleri: e.ortaklar,
+        ortakLogolari: e.ortaklar.map((o) => ({ ad: ortakAd.get(o) ?? o, logo: ortakLogo.get(o) ?? "" })),
         link: e.link,
         kayitLinki: e.kayitLinki,
         gorsel: e.gorsel,
