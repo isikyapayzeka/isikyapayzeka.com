@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { getCollection, getEntry } from "astro:content";
 import type { Dil } from "./i18n";
 import { METIN } from "./i18n";
@@ -15,6 +16,24 @@ function akademikDonem(tarih: string) {
   const [y, m] = tarih.split("-").map(Number);
   const bas = m >= 9 ? y : y - 1;
   return `${bas}–${String(bas + 1).slice(2)}`;
+}
+
+// public/etkinlikler/<ad>.jpg dosyasının piksel boyutu (JPEG başlığından okunur).
+// Afişler kırpılmadan kendi oranlarıyla gösterildiği için kartın yüksekliği buna göre ayarlanır.
+function jpegBoyutu(ad: string) {
+  try {
+    const b = readFileSync(`public/etkinlikler/${ad}.jpg`);
+    let i = 2;
+    while (i < b.length) {
+      const isaret = b[i + 1];
+      const uzunluk = b.readUInt16BE(i + 2);
+      if (isaret >= 0xc0 && isaret <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(isaret)) {
+        return { en: b.readUInt16BE(i + 7), boy: b.readUInt16BE(i + 5) };
+      }
+      i += 2 + uzunluk;
+    }
+  } catch {}
+  return { en: 1, boy: 1 };
 }
 
 export type Etkinlik = Awaited<ReturnType<typeof etkinlikler>>[number];
@@ -43,6 +62,7 @@ export async function etkinlikler(dil: Dil) {
         gorsel: e.gorsel,
         gorselAlt: sec(e.gorselAlt, e.gorselAltEn),
         afis: e.afis,
+        afisBoyut: e.gorsel && e.afis ? jpegBoyutu(e.gorsel) : null,
         baslangic,
         bitis,
         donem: akademikDonem(e.tarih),

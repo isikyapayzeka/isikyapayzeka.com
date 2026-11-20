@@ -19,14 +19,14 @@ const altBilgi = [
 ].filter(Boolean);
 ---
 <li
-  class:list={["kart", { "kart--yaklasan": yaklasan }]}
+  class:list={["kart", { "kart--yaklasan": yaklasan, "kart--yan": yaklasan && e.afis }]}
   data-bitis={e.bitisIso}
   data-yaklasan={yaklasan ? "" : undefined}
   data-gecmis-bekliyor={durum === "gecmis-bekliyor" ? "" : undefined}
   hidden={durum === "gecmis-bekliyor"}
 >
   <div class:list={["kart-gorsel", { "kart-gorsel--afis": e.afis }]}>
-    {g && e.afis && <img src={`${g}.jpg`} alt={e.gorselAlt} width="640" height="640" loading="lazy" decoding="async" />}
+    {g && e.afis && e.afisBoyut && <img src={`${g}.jpg`} alt={e.gorselAlt} width={e.afisBoyut.en} height={e.afisBoyut.boy} loading="lazy" decoding="async" />}
     {g && !e.afis && (
       <img
         src={`${g}-800.jpg`}
