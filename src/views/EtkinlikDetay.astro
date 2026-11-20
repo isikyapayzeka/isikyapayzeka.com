@@ -78,10 +78,73 @@ const sosyal = e.link.includes("linkedin.com") ? "LinkedIn" : e.link.includes("i
             </li>
           ))}
         </ul>
+
+        <!-- Fotoğraf görüntüleyici: küçük resme tıklanınca açılır; oklar, klavye ve kaydırma ile gezilir. -->
+        <dialog class="izleyici" aria-label={M.fotograflar}>
+          <img class="izleyici-foto" alt="" />
+          <p class="izleyici-sayac" aria-live="polite"></p>
+          <button type="button" class="izleyici-btn izleyici-kapat" aria-label={dil === "en" ? "Close" : "Kapat"}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+          <button type="button" class="izleyici-btn izleyici-onceki" aria-label={dil === "en" ? "Previous photo" : "Önceki fotoğraf"}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+          </button>
+          <button type="button" class="izleyici-btn izleyici-sonraki" aria-label={dil === "en" ? "Next photo" : "Sonraki fotoğraf"}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </dialog>
       </section>
     )}
   </article>
 </Base>
+
+<script>
+  const dlg = document.querySelector<HTMLDialogElement>(".izleyici");
+  const linkler = [...document.querySelectorAll<HTMLAnchorElement>(".galeri a")];
+  if (dlg && linkler.length) {
+    const foto = dlg.querySelector<HTMLImageElement>(".izleyici-foto")!;
+    const sayac = dlg.querySelector<HTMLElement>(".izleyici-sayac")!;
+    const tekFoto = linkler.length < 2;
+    dlg.querySelectorAll<HTMLElement>(".izleyici-onceki, .izleyici-sonraki").forEach((b) => (b.hidden = tekFoto));
+    let simdiki = 0;
+
+    const goster = (i: number) => {
+      simdiki = (i + linkler.length) % linkler.length;
+      const a = linkler[simdiki];
+      foto.src = a.href;
+      foto.alt = a.querySelector("img")?.alt ?? "";
+      sayac.textContent = `${simdiki + 1} / ${linkler.length}`;
+      // Bir sonraki fotoğrafı önceden yükle.
+      new Image().src = linkler[(simdiki + 1) % linkler.length].href;
+    };
+
+    linkler.forEach((a, i) =>
+      a.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        goster(i);
+        dlg.showModal();
+      }),
+    );
+    dlg.querySelector(".izleyici-kapat")!.addEventListener("click", () => dlg.close());
+    dlg.querySelector(".izleyici-onceki")!.addEventListener("click", () => goster(simdiki - 1));
+    dlg.querySelector(".izleyici-sonraki")!.addEventListener("click", () => goster(simdiki + 1));
+    // Fotoğrafın dışındaki koyu alana tıklayınca kapanır.
+    dlg.addEventListener("click", (ev) => { if (ev.target === dlg) dlg.close(); });
+    dlg.addEventListener("keydown", (ev) => {
+      if (tekFoto) return;
+      if (ev.key === "ArrowLeft") goster(simdiki - 1);
+      if (ev.key === "ArrowRight") goster(simdiki + 1);
+    });
+    // Dokunmatik ekranda sağa/sola kaydırma.
+    let basX = 0, basY = 0;
+    dlg.addEventListener("touchstart", (ev) => { basX = ev.touches[0].clientX; basY = ev.touches[0].clientY; }, { passive: true });
+    dlg.addEventListener("touchend", (ev) => {
+      const dx = ev.changedTouches[0].clientX - basX, dy = ev.changedTouches[0].clientY - basY;
+      if (!tekFoto && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) goster(simdiki + (dx < 0 ? 1 : -1));
+    });
+    dlg.addEventListener("close", () => linkler[simdiki].focus());
+  }
+</script>
 
 <style>
   .detay { padding-block: 32px 80px; display: grid; gap: 28px; }
@@ -115,4 +178,27 @@ const sosyal = e.link.includes("linkedin.com") ? "LinkedIn" : e.link.includes("i
   .galeri img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: scale 300ms ease-out; }
   .galeri a:hover img { scale: 1.03; }
   @media (prefers-reduced-motion: reduce) { .galeri img { transition: none; } .galeri a:hover img { scale: none; } }
+
+  .izleyici { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(5, 9, 40, 0.97); color: #FFFFFF; }
+  .izleyici[open] { display: grid; place-items: center; }
+  .izleyici::backdrop { background: transparent; }
+  :global(html:has(dialog[open])) { overflow: hidden; }
+  .izleyici-foto { max-width: calc(100vw - 32px); max-height: calc(100dvh - 120px); width: auto; height: auto; object-fit: contain; border-radius: 8px; }
+  .izleyici-sayac { position: absolute; top: 22px; left: 50%; translate: -50% 0; font: 500 14px/1 var(--f-etiket); color: rgba(255, 255, 255, 0.8); }
+  .izleyici-btn { position: absolute; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.14); color: #FFFFFF; cursor: pointer; appearance: none; transition: background-color 150ms ease-out; }
+  .izleyici-btn:hover { background: rgba(255, 255, 255, 0.26); }
+  .izleyici-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .izleyici-btn[hidden] { display: none; }
+  .izleyici-kapat { top: 12px; right: 12px; }
+  .izleyici-onceki, .izleyici-sonraki { top: 50%; translate: 0 -50%; }
+  .izleyici-onceki { left: 12px; }
+  .izleyici-sonraki { right: 12px; }
+  /* Telefonda oklar fotoğrafın altında, başparmak hizasında. */
+  @media (max-width: 640px) {
+    .izleyici-foto { max-height: calc(100dvh - 180px); }
+    .izleyici-onceki, .izleyici-sonraki { top: auto; bottom: 24px; translate: none; }
+    .izleyici-onceki { left: calc(50% - 64px); }
+    .izleyici-sonraki { right: calc(50% - 64px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .izleyici-btn { transition: none; } }
 </style>
