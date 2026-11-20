@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { getCollection, getEntry } from "astro:content";
 import type { Dil } from "./i18n";
-import { METIN } from "./i18n";
+import { METIN, yol } from "./i18n";
 
 const TZ = "Europe/Istanbul";
 
@@ -63,6 +63,9 @@ export async function etkinlikler(dil: Dil) {
         gorselAlt: sec(e.gorselAlt, e.gorselAltEn),
         afis: e.afis,
         afisBoyut: e.gorsel && e.afis ? jpegBoyutu(e.gorsel) : null,
+        galeri: e.galeri,
+        sayfa: etkinlikYolu(id, dil),
+        takvimDosyasi: `${dil === "en" ? "/en/calendar/" : "/takvim/"}${id}.ics`,
         baslangic,
         bitis,
         donem: akademikDonem(e.tarih),
@@ -108,6 +111,64 @@ export async function rakamlar() {
   );
   const calisilanKulupler = new Set(gecmis.flatMap((e) => e.data.ortaklar).filter((o) => ortakKulupler.has(o)));
   return { etkinlik: gecmis.length, konuk: konuklar.size, ortak: calisilanKulupler.size };
+}
+
+// Etkinliğin kendi sayfası: /etkinlikler/<id>/ ve /en/events/<id>/
+export function etkinlikYolu(id: string, dil: Dil) {
+  return `${yol("etkinlikler", dil)}${id}/`;
+}
+
+// "20261127T160000Z" biçimi (takvimler UTC ister).
+function utc(d: Date) {
+  return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+}
+
+export function googleTakvimLinki(e: Etkinlik, sayfaUrl: string) {
+  const p = new URLSearchParams({
+    action: "TEMPLATE",
+    text: e.baslik,
+    dates: `${utc(e.baslangic)}/${utc(e.bitis)}`,
+    details: [e.ozet, e.kayitLinki, sayfaUrl].filter(Boolean).join("\n\n"),
+    location: e.yer,
+  });
+  return `https://calendar.google.com/calendar/render?${p}`;
+}
+
+// RFC 5545: virgül, noktalı virgül ve satır sonu kaçışlı; 75 baytı geçen satırlar katlanır.
+function icsKacis(m: string) {
+  return m.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+}
+function katla(satir: string) {
+  const enc = new TextEncoder();
+  const parcalar: string[] = [];
+  let p = "";
+  for (const ch of satir) {
+    const sinir = parcalar.length ? 74 : 75;
+    if (enc.encode(p + ch).length > sinir) { parcalar.push(p); p = ch; } else p += ch;
+  }
+  parcalar.push(p);
+  return parcalar.join("\r\n ");
+}
+export function icsMetni(e: Etkinlik, sayfaUrl: string) {
+  const satirlar = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//isikyapayzeka.com//Etkinlikler//TR",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${e.id}@isikyapayzeka.com`,
+    `DTSTAMP:${utc(new Date())}`,
+    `DTSTART:${utc(e.baslangic)}`,
+    `DTEND:${utc(e.bitis)}`,
+    `SUMMARY:${icsKacis(e.baslik)}`,
+    e.yer ? `LOCATION:${icsKacis(e.yer)}` : "",
+    `DESCRIPTION:${icsKacis([e.ozet, e.kayitLinki, sayfaUrl].filter(Boolean).join("\n\n"))}`,
+    `URL:${sayfaUrl}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].filter(Boolean);
+  return satirlar.map(katla).join("\r\n") + "\r\n";
 }
 
 export function epostaHref(adres: string, konu = "") {

@@ -1,7 +1,8 @@
 ---
 import Base from "../layouts/Base.astro";
 import { METIN, type Dil } from "../i18n";
-import { ayarlar, epostaHref, etkinlikler, ortaklar } from "../veri";
+import OrtakSeridi from "../components/OrtakSeridi.astro";
+import { ayarlar, epostaHref, etkinlikler } from "../veri";
 
 interface Props { dil: Dil }
 const { dil } = Astro.props;
@@ -10,7 +11,6 @@ const A = await ayarlar();
 const simdi = Date.now();
 const gecmis = (await etkinlikler(dil)).filter((e) => e.bitis.getTime() < simdi);
 const konuklar = gecmis.flatMap((e) => e.konuklar.map((k) => ({ k, etkinlik: e.baslik, gun: e.gunKisa, yil: e.baslangic.getFullYear() })));
-const O = await ortaklar(dil);
 ---
 <Base dil={dil} sayfa="sirketler" baslik={M.sirketBaslik}>
   <section class="bolum kap giris">
@@ -41,11 +41,12 @@ const O = await ortaklar(dil);
           <li><span class="etiket">{`${x.gun} ${x.yil}`}</span><span class="konuk-ad">{x.k}</span><span class="ikincil">{x.etkinlik}</span></li>
         ))}
       </ul>
-      {O.length > 0 && (
-        <p class="ortak-satir ikincil">{M.ortak}: {O.map((o) => o.ad).join(" · ")}</p>
-      )}
     </section>
   )}
+
+  <section class="bolum kap">
+    <OrtakSeridi dil={dil} />
+  </section>
 </Base>
 
 <style>
@@ -64,5 +65,4 @@ const O = await ortaklar(dil);
   .konuklar li { display: grid; gap: 4px; padding-block: 16px; border-bottom: 1px solid var(--cizgi); }
   .konuk-ad { font-weight: 600; font-size: 18px; }
   @media (min-width: 820px) { .konuklar li { grid-template-columns: 140px 1fr 1fr; gap: 20px; align-items: baseline; } }
-  .ortak-satir { margin-top: 20px; }
 </style>

@@ -15,4 +15,7 @@ link: "https://www.linkedin.com/feed/update/urn:li:activity:7529118459637493762/
 gorsel: "foundation-models"
 gorselAlt: "Yusuf Hüseyin Şahin, kendisine verilen teşekkür plaketiyle kulüp temsilcilerinin arasında"
 gorselAltEn: "Yusuf Hüseyin Şahin holding a plaque of thanks, standing between club representatives"
+galeri:
+  - "foundation-models-1"
+  - "foundation-models-2"
 ---

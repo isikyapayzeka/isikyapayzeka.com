@@ -62,6 +62,17 @@ Elde yalnızca afiş varsa tek dosya yeter (`ad.jpg`, kare) ve `afis: true` sat�
 
 Ana sayfanın üstündeki büyük fotoğraf `src/data/ayarlar.yml` içindeki `kapak` alanından gelir, aynı iki boyut kuralı geçerlidir.
 
+### Etkinlik sayfasına galeri eklemek
+Her etkinliğin kendi sayfası var (`/etkinlikler/<dosya-adı>/`). Galeri için fotoğrafları `public/etkinlikler/galeri/` klasörüne `ad-800.jpg` (800 px) ve `ad-buyuk.jpg` (en fazla 1600 px) olarak yükleyin, sonra etkinlik dosyasına ekleyin:
+```
+galeri:
+  - "datathon-1"
+  - "datathon-2"
+```
+
+### Ortak logosu eklemek
+Kare logoyu `public/img/ortaklar/` klasörüne yükleyin ve `src/data/ortaklar.yml` içinde ilgili kayda `logo: "dosya-adi.jpg"` satırını ekleyin. Logo yoksa ortağın adı yazılır.
+
 ### Ekip, ortaklar, genel ayarlar
 - `src/data/ekip.yml`: yönetim ekibi. Liste boşken sitede ekip bölümü görünmez. Kişiyi eklemeden önce onayını alın.
 - `src/data/ortaklar.yml`: birlikte çalışılan kulüp ve kurumlar.

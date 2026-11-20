@@ -15,4 +15,9 @@ link: "https://www.linkedin.com/feed/update/urn:li:activity:7409618479672107008/
 gorsel: "microsoft-sahne"
 gorselAlt: "Mustafa Özdemir, Işık Üniversitesi sahnesinde öğrencilere konuşuyor"
 gorselAltEn: "Mustafa Özdemir speaking to students on the Işık University stage"
+galeri:
+  - "microsoft-1"
+  - "microsoft-2"
+  - "microsoft-3"
+  - "microsoft-4"
 ---

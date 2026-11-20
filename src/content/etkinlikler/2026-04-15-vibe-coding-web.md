@@ -15,4 +15,10 @@ link: "https://www.instagram.com/p/DXNQHTKCh81/"
 gorsel: "vibe-sunum"
 gorselAlt: "Katılımcılar atölyede tasarladıkları web sitesini perdede sunuyor"
 gorselAltEn: "Participants presenting the website they built during the workshop"
+galeri:
+  - "vibe-coding-1"
+  - "vibe-coding-2"
+  - "vibe-coding-3"
+  - "vibe-coding-4"
+  - "vibe-coding-5"
 ---

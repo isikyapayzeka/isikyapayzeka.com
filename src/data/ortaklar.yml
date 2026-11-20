@@ -5,16 +5,19 @@
   adEn: "HSD Işık"
   tur: kulup
   link: "https://www.instagram.com/hsdisik"
+  logo: "hsd-isik.jpg"
 - id: isik-endustri
   ad: "Işık Endüstri Mühendisliği Kulübü"
   adEn: "Işık Industrial Engineering Society"
   tur: kulup
   link: "https://www.instagram.com/isikendustri"
+  logo: "isik-endustri.jpg"
 - id: isik-itmis
   ad: "Işık IT&MIS Kulübü"
   adEn: "Işık IT&MIS Club"
   tur: kulup
   link: "https://www.instagram.com/isikitmis"
+  logo: "isik-itmis.jpg"
 - id: lavazza
   ad: "Lavazza"
   adEn: "Lavazza"
@@ -25,3 +28,4 @@
   adEn: "Europe Coding School"
   tur: kurum
   link: "https://www.instagram.com/europecodingschool.tr"
+  logo: "europe-coding-school.jpg"

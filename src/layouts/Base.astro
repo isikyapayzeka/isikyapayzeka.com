@@ -7,14 +7,18 @@ interface Props {
   sayfa: Sayfa;
   baslik?: string;
   aciklama?: string;
+  // Etkinlik sayfası gibi YOLLAR dışındaki sayfalar için iki dildeki adres.
+  alternatif?: { tr: string; en: string };
+  gorsel?: string; // paylaşım önizlemesi (og:image) için site köküne göre yol
 }
-const { dil, sayfa, baslik, aciklama } = Astro.props;
+const { dil, sayfa, baslik, aciklama, alternatif, gorsel } = Astro.props;
+const adres = (d: Dil) => (alternatif ? alternatif[d] : yol(sayfa, d));
 const M = METIN[dil];
 const A = await ayarlar();
 const digerDil: Dil = dil === "tr" ? "en" : "tr";
 const sayfaBasligi = baslik ? `${baslik} · ${M.kulup}` : M.kulup;
 const sayfaAciklamasi = aciklama ?? (dil === "en" ? A.vizyonEn : A.vizyon);
-const kanonik = new URL(yol(sayfa, dil), Astro.site).href;
+const kanonik = new URL(adres(dil), Astro.site).href;
 const guncelleme = new Intl.DateTimeFormat(M.yerel, { timeZone: "Europe/Istanbul", day: "numeric", month: "long", year: "numeric" }).format(new Date());
 const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil), ad: M.menu[s] }));
 ---
@@ -26,13 +30,13 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   <title>{sayfaBasligi}</title>
   <meta name="description" content={sayfaAciklamasi} />
   <link rel="canonical" href={kanonik} />
-  <link rel="alternate" hreflang="tr" href={new URL(yol(sayfa, "tr"), Astro.site).href} />
-  <link rel="alternate" hreflang="en" href={new URL(yol(sayfa, "en"), Astro.site).href} />
+  <link rel="alternate" hreflang="tr" href={new URL(adres("tr"), Astro.site).href} />
+  <link rel="alternate" hreflang="en" href={new URL(adres("en"), Astro.site).href} />
   <meta property="og:title" content={sayfaBasligi} />
   <meta property="og:description" content={sayfaAciklamasi} />
   <meta property="og:url" content={kanonik} />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content={new URL("/img/kulup-logo.png", Astro.site).href} />
+  <meta property="og:image" content={new URL(gorsel ?? "/img/kulup-logo.png", Astro.site).href} />
   <meta name="theme-color" content="#0A118E" />
   <link rel="icon" href="/img/kulup-logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -59,7 +63,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
           {menu.filter((m) => m.s !== "anasayfa").map((m) => <li><a href={m.href} aria-current={m.s === sayfa ? "page" : undefined}>{m.ad}</a></li>)}
         </ul>
       </nav>
-      <a class="dil" href={yol(sayfa, digerDil)} hreflang={digerDil} lang={digerDil}>{M.digerDil}</a>
+      <a class="dil" href={adres(digerDil)} hreflang={digerDil} lang={digerDil}>{M.digerDil}</a>
     </div>
   </header>
 
@@ -233,10 +237,10 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   @media (min-width: 720px) { .kartlar { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1040px) { .kartlar--uc { grid-template-columns: repeat(3, 1fr); } }
   /* Kartın tamamı başlıktaki linke tıklar; kayıt butonu bunun üstünde kalır. */
-  .kart { position: relative; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; background: var(--kart); box-shadow: var(--golge); min-width: 0; transition: box-shadow 150ms ease-out; }
+  .kart { position: relative; display: flex; flex-direction: column; border-radius: 16px; background: var(--kart); box-shadow: var(--golge); min-width: 0; transition: box-shadow 150ms ease-out; }
   .kart:hover { box-shadow: var(--golge-hover); }
   .kart--yaklasan { box-shadow: 0 0 0 2px var(--vurgu), var(--golge); }
-  .kart-gorsel { position: relative; aspect-ratio: 4 / 3; background: var(--zemin-2); overflow: hidden; }
+  .kart-gorsel { position: relative; aspect-ratio: 4 / 3; background: var(--zemin-2); overflow: hidden; border-radius: 16px 16px 0 0; }
   .kart-gorsel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: scale 300ms ease-out; }
   .kart:hover .kart-gorsel img { scale: 1.03; }
   /* Afiş kırpılmaz: kutu afişin kendi oranını alır. */
@@ -245,7 +249,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   /* Yaklaşan etkinlik afişliyse geniş ekranda afiş solda, bilgiler sağda. */
   @media (min-width: 720px) {
     .kart--yan { grid-column: 1 / -1; flex-direction: row; align-items: stretch; }
-    .kart--yan .kart-gorsel { flex: 0 0 min(42%, 400px); align-self: start; }
+    .kart--yan .kart-gorsel { flex: 0 0 min(42%, 400px); align-self: start; border-radius: 16px 0 0 16px; }
     .kart--yan .kart-govde { padding: 28px 32px; justify-content: center; }
   }
   .kart-gorsel .kart-logo { inset: 0; margin: auto; width: 96px; height: 96px; object-fit: contain; opacity: 0.6; }
@@ -258,7 +262,7 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   .kart-ozet { color: var(--ikincil); font-size: 15px; }
   .kart-konuk { font-size: 14px; }
   .kart-alt-bilgi { font-size: 13.5px; color: var(--soluk); }
-  .kart-btn { position: relative; z-index: 1; margin-top: auto; align-self: start; }
+  .kart-eylem { position: relative; z-index: 1; margin-top: auto; padding-top: 6px; display: flex; flex-wrap: wrap; gap: 10px; align-items: start; }
   @media (prefers-reduced-motion: reduce) { .kart-gorsel img { transition: none; } .kart:hover .kart-gorsel img { scale: none; } }
 
   /* Alt bilgi */

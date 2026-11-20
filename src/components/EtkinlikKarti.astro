@@ -2,6 +2,7 @@
 // Fotoğraflı etkinlik kartı. Görseli olmayan etkinlikte lacivert bir yer tutucu gösterilir.
 import { METIN, type Dil } from "../i18n";
 import type { Etkinlik } from "../veri";
+import TakvimMenusu from "./TakvimMenusu.astro";
 
 interface Props {
   e: Etkinlik;
@@ -46,10 +47,15 @@ const altBilgi = [
       <time datetime={e.iso}>{yaklasan ? `${e.gun} · ${e.haftaGunu}` : e.gun}</time>
       <span>{e.tur}</span>
     </p>
-    <h3>{e.link ? <a href={e.link}>{e.baslik}</a> : e.baslik}</h3>
+    <h3><a href={e.sayfa}>{e.baslik}</a></h3>
     {e.ozet && <p class="kart-ozet">{e.ozet}</p>}
     {e.konuklar.length > 0 && <p class="kart-konuk">{e.konuklar.join(", ")}</p>}
     {altBilgi.length > 0 && <p class="kart-alt-bilgi">{altBilgi.join(" · ")}</p>}
-    {yaklasan && e.kayitLinki && <a class="btn btn--ana kart-btn" href={e.kayitLinki}>{M.kayitOl}</a>}
+    {yaklasan && (
+      <div class="kart-eylem">
+        {e.kayitLinki && <a class="btn btn--ana" href={e.kayitLinki}>{M.kayitOl}</a>}
+        <TakvimMenusu e={e} dil={dil} />
+      </div>
+    )}
   </div>
 </li>

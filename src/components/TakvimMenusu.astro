@@ -1,0 +1,26 @@
+---
+// "Takvime ekle" açılır menüsü: Google Takvim linki ve .ics dosyası.
+import { METIN, type Dil } from "../i18n";
+import { googleTakvimLinki, type Etkinlik } from "../veri";
+
+interface Props { e: Etkinlik; dil: Dil }
+const { e, dil } = Astro.props;
+const M = METIN[dil];
+const sayfaUrl = new URL(e.sayfa, Astro.site).href;
+---
+<details class="takvim">
+  <summary class="btn">{M.takvimeEkle}</summary>
+  <ul>
+    <li><a href={googleTakvimLinki(e, sayfaUrl)} target="_blank" rel="noopener">{M.googleTakvim}</a></li>
+    <li><a href={e.takvimDosyasi} download={`${e.id}.ics`}>{M.icsDosyasi}</a></li>
+  </ul>
+</details>
+
+<style>
+  .takvim { position: relative; z-index: 2; }
+  .takvim summary { list-style: none; cursor: pointer; }
+  .takvim summary::-webkit-details-marker { display: none; }
+  .takvim ul { position: absolute; z-index: 5; top: calc(100% + 6px); left: 0; min-width: 240px; list-style: none; margin: 0; padding: 6px; background: var(--kart); border-radius: 12px; box-shadow: var(--golge-hover); }
+  .takvim a { display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none; color: var(--yazi); }
+  .takvim a:hover { background: var(--zemin-2); }
+</style>

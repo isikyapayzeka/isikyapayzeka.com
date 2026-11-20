@@ -1,8 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
 import EtkinlikKarti from "../components/EtkinlikKarti.astro";
+import OrtakSeridi from "../components/OrtakSeridi.astro";
 import { METIN, yol, type Dil } from "../i18n";
-import { ayarlar, etkinlikler } from "../veri";
+import { ayarlar, etkinlikler, rakamlar } from "../veri";
 
 interface Props { dil: Dil }
 const { dil } = Astro.props;
@@ -15,6 +16,8 @@ const yaklasan = tumu.filter((e) => e.bitis.getTime() >= simdi).reverse();
 const gecmis = tumu.filter((e) => e.bitis.getTime() < simdi);
 const son = [...gecmis.filter((e) => e.gorsel && !e.afis), ...gecmis.filter((e) => !e.gorsel || e.afis)].slice(0, 3);
 const kapak = A.kapak ? `/etkinlikler/${A.kapak}` : "";
+// Rakamlar build sırasında veriden sayılır; sayfaya düz metin olarak yazılır.
+const R = await rakamlar();
 ---
 <Base dil={dil} sayfa="anasayfa">
   <section class="hero">
@@ -41,6 +44,14 @@ const kapak = A.kapak ? `/etkinlikler/${A.kapak}` : "";
     </div>
   </section>
 
+  <section class="kap rakamlar" aria-label={dil === "en" ? "The club in numbers" : "Rakamlarla kulüp"}>
+    <dl>
+      {M.rakamlar.map((r) => (
+        <div><dt>{r.etiket}</dt><dd>{R[r.anahtar as keyof typeof R]}</dd></div>
+      ))}
+    </dl>
+  </section>
+
   {yaklasan.length > 0 && (
     <section class="bolum kap" aria-labelledby="siradaki">
       <div class="bolum-bas"><h2 id="siradaki">{M.siradaki}</h2></div>
@@ -65,6 +76,10 @@ const kapak = A.kapak ? `/etkinlikler/${A.kapak}` : "";
     <ul class="kartlar kartlar--uc">
       {son.map((e) => <EtkinlikKarti e={e} dil={dil} />)}
     </ul>
+  </section>
+
+  <section class="kap ortak-bolum">
+    <OrtakSeridi dil={dil} />
   </section>
 
   <section class="kap katil" aria-labelledby="kimler">
@@ -104,6 +119,14 @@ const kapak = A.kapak ? `/etkinlikler/${A.kapak}` : "";
   .satir { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
   .btn--cam { color: #FFFFFF; background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .btn--cam:hover { background: rgba(255, 255, 255, 0.18); border-color: #FFFFFF; }
+
+  .rakamlar { margin-top: -44px; position: relative; z-index: 2; }
+  .rakamlar dl { margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); background: var(--kart); border-radius: 16px; box-shadow: var(--golge-hover); }
+  .rakamlar div { display: flex; flex-direction: column-reverse; align-items: center; gap: 2px; padding: 18px 8px; text-align: center; }
+  .rakamlar div + div { border-left: 1px solid var(--cizgi); }
+  .rakamlar dd { margin: 0; font: 500 clamp(30px, 5vw, 44px)/1 var(--f-baslik); color: var(--vurgu); }
+  .rakamlar dt { font-size: 13px; color: var(--ikincil); }
+  .ortak-bolum { padding-block: 8px 48px; }
 
   .serit { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 0; margin-top: 32px; border-block: 1px solid var(--cizgi); color: var(--ikincil); font-size: 15px; }
   .serit-nokta { width: 8px; height: 8px; border-radius: 50%; background: var(--yesil); box-shadow: 0 0 0 4px rgba(43, 125, 115, 0.16); }

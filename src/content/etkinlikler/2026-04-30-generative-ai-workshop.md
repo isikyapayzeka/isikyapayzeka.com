@@ -15,4 +15,11 @@ link: "https://www.linkedin.com/feed/update/urn:li:activity:7458147902037794816/
 gorsel: "genai-atolye"
 gorselAlt: "İki öğrenci bilgisayar başında üretken yapay zekâ projesi geliştiriyor"
 gorselAltEn: "Two students building a generative AI project at their laptops"
+galeri:
+  - "genai-1"
+  - "genai-2"
+  - "genai-3"
+  - "genai-4"
+  - "genai-5"
+  - "genai-6"
 ---

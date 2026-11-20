@@ -31,6 +31,8 @@ const etkinlikler = defineCollection({
     gorselAlt: z.string().default(""),
     gorselAltEn: z.string().default(""),
     afis: z.boolean().default(false),
+    // Etkinlik sayfasındaki galeri: public/etkinlikler/galeri/<ad>-800.jpg ve <ad>-buyuk.jpg
+    galeri: z.array(z.string()).default([]),
   }),
 });
 
@@ -54,6 +56,8 @@ const ortaklar = defineCollection({
     adEn: z.string().default(""),
     tur: z.enum(["kulup", "kurum", "sponsor"]),
     link: z.string().default(""),
+    // public/img/ortaklar/ içindeki logo dosyası. Boşsa adı yazılır.
+    logo: z.string().default(""),
   }),
 });
 
