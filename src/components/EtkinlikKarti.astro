@@ -14,10 +14,7 @@ const { e, dil, durum = "gecmis" } = Astro.props;
 const M = METIN[dil];
 const yaklasan = durum === "yaklasan";
 const g = e.gorsel ? `/etkinlikler/${e.gorsel}` : "";
-const altBilgi = [
-  e.ortaklar.length ? `${M.ortak}: ${e.ortaklar.join(", ")}` : "",
-  yaklasan ? [e.yer, e.saat].filter(Boolean).join(" · ") : "",
-].filter(Boolean);
+const altBilgi = yaklasan ? [e.yer, e.saat].filter(Boolean).join(" · ") : "";
 ---
 <li
   class:list={["kart", { "kart--yaklasan": yaklasan, "kart--yan": yaklasan && e.afis }]}
@@ -50,7 +47,21 @@ const altBilgi = [
     <h3><a href={e.sayfa}>{e.baslik}</a></h3>
     {e.ozet && <p class="kart-ozet">{e.ozet}</p>}
     {e.konuklar.length > 0 && <p class="kart-konuk">{e.konuklar.join(", ")}</p>}
-    {altBilgi.length > 0 && <p class="kart-alt-bilgi">{altBilgi.join(" · ")}</p>}
+    {altBilgi && <p class="kart-alt-bilgi">{altBilgi}</p>}
+    {e.ortakLogolari.length > 0 && (
+      <div class="kart-ortak">
+        <span class="kart-ortak-etiket">{M.ortak}</span>
+        <ul>
+          {e.ortakLogolari.map((o) => (
+            <li title={o.ad}>
+              {o.logo
+                ? <img src={`/img/ortaklar/${o.logo}`} alt={o.ad} width="40" height="40" loading="lazy" decoding="async" />
+                : <span class="kart-ortak-ad">{o.ad}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
     {yaklasan && (
       <div class="kart-eylem">
         {e.kayitLinki && <a class="btn btn--ana" href={e.kayitLinki}>{M.kayitOl}</a>}

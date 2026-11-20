@@ -262,6 +262,12 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   .kart-ozet { color: var(--ikincil); font-size: 15px; }
   .kart-konuk { font-size: 14px; }
   .kart-alt-bilgi { font-size: 13.5px; color: var(--soluk); }
+  .kart-ortak { display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--cizgi); }
+  .kart-ortak-etiket { font: 500 12px/1 var(--f-etiket); letter-spacing: 0.06em; color: var(--soluk); flex: none; }
+  .kart-ortak ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .kart-ortak li { display: flex; }
+  .kart-ortak img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; outline: 1px solid rgba(33, 37, 41, 0.12); outline-offset: -1px; background: #FFFFFF; }
+  .kart-ortak-ad { height: 40px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 10px; background: var(--zemin-2); font: 600 13px/1 var(--f-baslik); color: var(--yazi); white-space: nowrap; }
   .kart-eylem { position: relative; z-index: 1; margin-top: auto; padding-top: 6px; display: flex; flex-wrap: wrap; gap: 10px; align-items: start; }
   @media (prefers-reduced-motion: reduce) { .kart-gorsel img { transition: none; } .kart:hover .kart-gorsel img { scale: none; } }
 
