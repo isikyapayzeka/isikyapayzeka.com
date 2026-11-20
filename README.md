@@ -44,6 +44,7 @@ link: ""
 - `tur` şunlardan biri: `atolye`, `soylesi`, `yayin`, `sosyal`, `yarisma`, `diger`.
 - `ortaklar` içindeki adlar `src/data/ortaklar.yml` dosyasındaki `id` değerleridir.
 - Etkinlik tarihi gelene kadar "Yaklaşan etkinlikler"de durur, bitince kendiliğinden "Geçmiş etkinlikler"e geçer.
+- Link sayfasındaki (`/link`) "Sıradaki etkinlik" kartı da buradan dolar: en yakın tarihli etkinlik, afişi, kayıt ve takvim butonlarıyla görünür. Ayrıca bir şey yazmanız gerekmez.
 - Etkinlik bittikten sonra Instagram ya da LinkedIn gönderisinin linkini `link` alanına ekleyin.
 
 ### Etkinliğe fotoğraf eklemek
@@ -122,7 +123,7 @@ eposta: "kulup@ornek.edu.tr",
 
 **WhatsApp:** Kulübün topluluk veya kanal davet linkini yazın. Kişisel telefon numarası yazmayın.
 
-**Yaklaşan etkinlik eklemek:**
+**Yaklaşan etkinlik eklemek:** Normalde gerekmez. `etkinlik` alanı boşken sayfa sıradaki etkinliği sitedeki etkinlik listesinden (`src/content/etkinlikler/`) kendisi alır. Aşağıdaki alanı yalnızca sitede olmayan bir etkinliği göstermek için doldurun, doluyken sitedeki yerine bu gösterilir.
 ```
 etkinlik: {
   baslik: "Yapay Zekaya Giriş Atölyesi",
