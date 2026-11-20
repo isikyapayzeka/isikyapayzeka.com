@@ -1,10 +1,9 @@
 import type { APIRoute } from "astro";
 import { etkinlikler, googleTakvimLinki, type Etkinlik } from "../../veri";
 
-// Link sayfası (/link) "Sıradaki etkinlik" kartını bu dosyadan doldurur.
-// Build anında bitmemiş etkinlikler yazılır; tarayıcı bitiş saati geçeni ayrıca eler.
+// Link sayfası (/link) "Sıradaki etkinlik" kartını ve "Geçmiş etkinlikler" listesini bu dosyadan doldurur.
+// Tüm etkinlikler eskiden yeniye yazılır; hangisinin geçmiş olduğuna tarayıcı o anki saate göre karar verir.
 export const GET: APIRoute = async ({ site }) => {
-  const simdi = Date.now();
   const tr = await etkinlikler("tr");
   const en = await etkinlikler("en");
   const dilde = (e: Etkinlik) => ({
@@ -16,7 +15,6 @@ export const GET: APIRoute = async ({ site }) => {
     google: googleTakvimLinki(e, new URL(e.sayfa, site).href),
   });
   const liste = tr
-    .filter((e) => e.bitis.getTime() >= simdi)
     .sort((a, b) => a.baslangic.getTime() - b.baslangic.getTime())
     .map((e) => {
       const g = e.gorsel ? `/etkinlikler/${e.gorsel}` : "";

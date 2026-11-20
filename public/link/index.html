@@ -48,15 +48,10 @@ const CONFIG = {
   konum: "https://www.google.com/maps/search/?api=1&query=I%C5%9F%C4%B1k+%C3%9Cniversitesi+%C5%9Eile+Kamp%C3%BCs%C3%BC",
 
   // ---- Geçmiş etkinlikler ----
-  // Her etkinlik bir satır. link ve baslikEn boş olabilir. Örnek:
+  // Sitedeki geçmiş etkinlikler (src/content/etkinlikler) kendiliğinden listelenir.
+  // Buraya yalnızca sitede olmayan bir etkinliği eklemek için yazın. link ve baslikEn boş olabilir. Örnek:
   // { baslik: "Tanışma Buluşması", baslikEn: "Meet & Greet", tarih: "2026-10-08", link: "" },
   gecmisEtkinlikler: [
-    { baslik: "Welcome Etkinliği", baslikEn: "Welcome Event", tarih: "2026-10-08", link: "https://www.instagram.com/reel/DeSB0wgRbF-/" },
-    { baslik: "Generative AI Workshop", baslikEn: "Generative AI Workshop", tarih: "2026-04-30", link: "https://www.linkedin.com/feed/update/urn:li:activity:7458147902037794816/" },
-    { baslik: "AI Kariyer Yayını", baslikEn: "AI Career Livestream", tarih: "2026-04-24", link: "https://www.instagram.com/p/DXZdlK_ivr3/" },
-    { baslik: "Vibe Coding Atölyesi", baslikEn: "Vibe Coding Workshop", tarih: "2026-04-15", link: "https://www.instagram.com/p/DXNQHTKCh81/" },
-    { baslik: "Microsoft Kariyer Sohbeti", baslikEn: "Microsoft Career Talk", tarih: "2025-12-23", link: "https://www.linkedin.com/feed/update/urn:li:activity:7409618479672107008/" },
-    { baslik: "Veri Analizi Atölyesi", baslikEn: "Data Analysis Workshop", tarih: "2025-10-22", link: "https://www.linkedin.com/feed/update/urn:li:activity:7390070280234217473/" },
   ]
 
 };
@@ -615,7 +610,7 @@ function baslat(dil) {
     return m ? new Date(m[1] + "-" + m[2] + "-" + m[3] + "T12:00:00+03:00") : tarihSaat(s);
   }
   function hrefYap(v, konu) {
-    if (/^(https?:|mailto:)/i.test(v)) return v;
+    if (/^(https?:|mailto:)/i.test(v) || v.charAt(0) === "/") return v;
     if (v.indexOf("@") > 0 && v.indexOf("/") === -1) {
       return "mailto:" + v + (konu ? "?subject=" + encodeURIComponent(konu) : "");
     }
@@ -718,21 +713,30 @@ function baslat(dil) {
     }
     kartDoldur(k);
   }
-  if (document.getElementById("etkinlik").hidden && window.fetch) {
-    // Sitedeki etkinlik listesi (src/content/etkinlikler) build sırasında bu dosyaya yazılır.
+  // Sitedeki etkinlik listesi (src/content/etkinlikler) build sırasında bu dosyaya yazılır.
+  function siteVerisi(veri) {
+    var simdi = new Date();
+    var tumu = veri.etkinlikler || [];
+    var siradaki = tumu.filter(function (x) { return new Date(x.bitis) >= simdi; })[0];
+    if (siradaki && document.getElementById("etkinlik").hidden) {
+      var d = siradaki[dil] || siradaki.tr;
+      kartDoldur({
+        baslik: d.baslik, bas: new Date(siradaki.baslangic), bit: new Date(siradaki.bitis), yer: d.yer,
+        kayit: siradaki.kayitLinki, sayfa: d.sayfa, gorsel: siradaki.gorsel, gorselAlt: d.gorselAlt,
+        ics: d.takvim, google: d.google
+      });
+    }
+    gecmisCiz(tumu
+      .filter(function (x) { return new Date(x.bitis) < simdi; })
+      .map(function (x) { var d = x[dil] || x.tr; return { baslik: x.tr.baslik, gorunen: d.baslik, tarih: new Date(x.baslangic), link: d.sayfa }; }));
+  }
+  if (window.fetch) {
     fetch("/link/etkinlikler.json")
       .then(function (r) { return r.ok ? r.json() : { etkinlikler: [] }; })
-      .then(function (veri) {
-        var s = (veri.etkinlikler || []).filter(function (x) { return new Date(x.bitis) >= new Date(); })[0];
-        if (!s) return;
-        var d = s[dil] || s.tr;
-        kartDoldur({
-          baslik: d.baslik, bas: new Date(s.baslangic), bit: new Date(s.bitis), yer: d.yer,
-          kayit: s.kayitLinki, sayfa: d.sayfa, gorsel: s.gorsel, gorselAlt: d.gorselAlt,
-          ics: d.takvim, google: d.google
-        });
-      })
-      .catch(function () {});
+      .catch(function () { return { etkinlikler: [] }; })
+      .then(siteVerisi);
+  } else {
+    gecmisCiz([]);
   }
 
   // ---- Linkler: boş olan ya da daha önce eklenmiş olan gizlenir ----
@@ -775,36 +779,42 @@ function baslat(dil) {
   });
 
   // ---- Geçmiş etkinlikler ----
-  var liste = document.getElementById("gecmis-liste");
-  var OK_SVG = '<svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>';
-  var bicim = new Intl.DateTimeFormat(YEREL, { timeZone: TZ, day: "numeric", month: "short", year: "numeric" });
-  var gorulenEtkinlik = new Set();
-  gecmis
-    .map(function (g) { return { baslik: temiz(g.baslik), gorunen: temiz(sec(g.baslik, g.baslikEn)), tarih: sadeceTarih(g.tarih), link: temiz(g.link) }; })
-    .filter(function (g) {
-      if (!g.baslik) return false;
-      var anahtar = g.baslik.toLocaleLowerCase("tr") + "|" + (g.tarih ? g.tarih.toISOString().slice(0, 10) : "");
-      if (gorulenEtkinlik.has(anahtar)) return false;
-      gorulenEtkinlik.add(anahtar);
-      return true;
-    })
-    .sort(function (a, b) { return (b.tarih || 0) - (a.tarih || 0); })
-    .forEach(function (g) {
-      var li = document.createElement("li");
-      var t = document.createElement("time");
-      t.textContent = g.tarih ? bicim.format(g.tarih) : "";
-      var satir = document.createElement(g.link ? "a" : "div");
-      satir.className = "gecmis-satir";
-      if (g.link) satir.href = hrefYap(g.link);
-      var ad = document.createElement("span");
-      ad.className = "ad";
-      ad.textContent = g.gorunen;
-      satir.append(t, ad);
-      if (g.link) satir.insertAdjacentHTML("beforeend", OK_SVG);
-      li.append(satir);
-      liste.append(li);
+  // Aynı güne düşen iki kayıttan ilki kalır: önce sitedekiler, sonra CONFIG'dekiler gelir.
+  function gecmisCiz(siteden) {
+    var liste = document.getElementById("gecmis-liste");
+    var OK_SVG = '<svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>';
+    var bicim = new Intl.DateTimeFormat(YEREL, { timeZone: TZ, day: "numeric", month: "short", year: "numeric" });
+    var gunAnahtari = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" });
+    var gorulenGun = new Set();
+    var elle = gecmis.map(function (g) {
+      return { baslik: temiz(g.baslik), gorunen: temiz(sec(g.baslik, g.baslikEn)), tarih: sadeceTarih(g.tarih), link: temiz(g.link) };
     });
-  if (liste.children.length) document.getElementById("gecmis-kutu").hidden = false;
+    siteden.concat(elle)
+      .filter(function (g) {
+        if (!g.baslik) return false;
+        var anahtar = g.tarih ? gunAnahtari.format(g.tarih) : g.baslik.toLocaleLowerCase("tr");
+        if (gorulenGun.has(anahtar)) return false;
+        gorulenGun.add(anahtar);
+        return true;
+      })
+      .sort(function (a, b) { return (b.tarih || 0) - (a.tarih || 0); })
+      .forEach(function (g) {
+        var li = document.createElement("li");
+        var t = document.createElement("time");
+        t.textContent = g.tarih ? bicim.format(g.tarih) : "";
+        var satir = document.createElement(g.link ? "a" : "div");
+        satir.className = "gecmis-satir";
+        if (g.link) satir.href = hrefYap(g.link);
+        var ad = document.createElement("span");
+        ad.className = "ad";
+        ad.textContent = g.gorunen;
+        satir.append(t, ad);
+        if (g.link) satir.insertAdjacentHTML("beforeend", OK_SVG);
+        li.append(satir);
+        liste.append(li);
+      });
+    if (liste.children.length) document.getElementById("gecmis-kutu").hidden = false;
+  }
 
   // ---- Dil düğmesi: diğer dile geçer ----
   var dilBtn = document.getElementById("dil-btn");
