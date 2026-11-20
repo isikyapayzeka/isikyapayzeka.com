@@ -4,6 +4,7 @@ import Base from "../layouts/Base.astro";
 import { METIN, yol, type Dil } from "../i18n";
 import TakvimMenusu from "../components/TakvimMenusu.astro";
 import { etkinlikYolu, type Etkinlik } from "../veri";
+import { etkinlikSemasi, yolSemasi } from "../seo";
 
 interface Props { dil: Dil; e: Etkinlik }
 const { dil, e } = Astro.props;
@@ -18,15 +19,30 @@ const bilgiler = [
   { etiket: M.konuk, deger: e.konuklar.join(", ") },
   { etiket: M.ortak, deger: e.ortaklar.join(", ") },
 ].filter((b) => b.deger);
+// Özeti olmayan etkinlikte arama sonucu açıklaması tür, tarih ve yerden kurulur.
+const aciklama = e.ozet || [e.tur, e.gun, e.yer].filter(Boolean).join(" · ");
+const sema = [
+  etkinlikSemasi(e, dil, Astro.site!),
+  yolSemasi(
+    [
+      { ad: M.menu.anasayfa, yol: yol("anasayfa", dil) },
+      { ad: M.menu.etkinlikler, yol: yol("etkinlikler", dil) },
+      { ad: e.baslik, yol: e.sayfa },
+    ],
+    Astro.site!,
+  ),
+];
 const sosyal = e.link.includes("linkedin.com") ? "LinkedIn" : e.link.includes("instagram.com") ? "Instagram" : "";
 ---
 <Base
   dil={dil}
   sayfa="etkinlikler"
   baslik={e.baslik}
-  aciklama={e.ozet || undefined}
+  aciklama={aciklama}
   alternatif={{ tr: etkinlikYolu(e.id, "tr"), en: etkinlikYolu(e.id, "en") }}
   gorsel={ogGorsel}
+  gorselAlt={e.gorselAlt}
+  sema={sema}
 >
   <article class="kap detay">
     <a class="geri metin-link" href={yol("etkinlikler", dil)}>← {M.tumEtkinlikler}</a>

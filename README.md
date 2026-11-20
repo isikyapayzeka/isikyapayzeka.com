@@ -165,6 +165,21 @@ Depoda `public/link/index.html` → **History** bölümünden önceki sürümü 
 
 ---
 
+## Arama motorları ve yapay zekâ asistanları
+
+Site Google, Bing ve yapay zekâ asistanları (ChatGPT, Claude, Perplexity) için hazırlanmıştır. Aşağıdakiler kendiliğinden güncellenir, elle bakım gerekmez:
+
+- `/sitemap.xml`: tüm sayfaların listesi. Yeni etkinlik eklenince kendiliğinden girer.
+- `/llms.txt`: kulübün ve etkinliklerin yapay zekâ asistanları için düz metin özeti.
+- Her sayfadaki görünmez yapısal veri (kulüp bilgisi, etkinlik tarihi ve yeri): `src/seo.ts`.
+
+Elle değiştirilebilecekler:
+
+- Arama sonuçlarında görünen sayfa başlığı ve açıklamaları: `src/i18n.ts` içindeki `anaBaslik` ve `aciklamalar`.
+- Hakkımızda sayfasındaki "Sık sorulan sorular": `src/i18n.ts` içindeki `sss`.
+
+**Silmeyin:** `public/googlecf6d553f1f75b751.html` (Google Search Console doğrulaması) ve `public/` içindeki 32 karakterlik `.txt` dosyası (IndexNow anahtarı; Bing'e yeni sayfaları bildirir). Silinirse doğrulama düşer.
+
 ## Notlar
 - Sayfa ilk açılışta dil sorar (Türkçe / English). Seçim o telefonda hatırlanır, sağ üstteki düğmeyle değiştirilebilir.
 - Google Formlar ve WhatsApp grubu tek dilli kalır. Gerekirse formlara İngilizce açıklama eklenebilir.
