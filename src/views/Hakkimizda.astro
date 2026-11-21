@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
-import { METIN, type Dil } from "../i18n";
+import { METIN, yol, type Dil } from "../i18n";
+import { sssSemasi } from "../seo";
 import { ayarlar, ekip, epostaHref, etkinlikler } from "../veri";
 
 interface Props { dil: Dil }
@@ -17,9 +18,12 @@ const doldur = (m: string) =>
     .replace("{ilkEtkinlik}", ilk?.baslik ?? "")
     .replace("{sayi}", String(gecmis.length))
     .replace("{eposta}", A.eposta);
-const sss = M.sss.filter((x) => (ilk || !x.cevap.includes("{ilk")) && (A.eposta || !x.cevap.includes("{eposta}")));
+const sss = M.sss
+  .filter((x) => (ilk || !x.cevap.includes("{ilk")) && (A.eposta || !x.cevap.includes("{eposta}")))
+  .map((x) => ({ soru: x.soru, cevap: doldur(x.cevap) }));
+const sema = [sssSemasi(sss, new URL(yol("hakkimizda", dil), Astro.site).href)];
 ---
-<Base dil={dil} sayfa="hakkimizda" baslik={M.hakkimizdaBaslik}>
+<Base dil={dil} sayfa="hakkimizda" baslik={M.hakkimizdaBaslik} sema={sema}>
   <section class="bolum kap giris">
     <p class="etiket">{M.ust.toLocaleUpperCase(dil)}</p>
     <h1>{M.hakkimizdaBaslik}</h1>
@@ -76,7 +80,7 @@ const sss = M.sss.filter((x) => (ilk || !x.cevap.includes("{ilk")) && (A.eposta 
     <div class="bolum-bas"><h2 id="sss">{M.sssBaslik}</h2></div>
     <dl class="sss">
       {sss.map((x) => (
-        <div><dt>{x.soru}</dt><dd class="ikincil">{doldur(x.cevap)}</dd></div>
+        <div><dt>{x.soru}</dt><dd class="ikincil">{x.cevap}</dd></div>
       ))}
     </dl>
   </section>
