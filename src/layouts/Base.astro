@@ -1,4 +1,16 @@
 ---
+// Yazı tipleri siteyle birlikte sunulur (Google Fonts'a ayrı bağlantı açılmaz, sayfa daha hızlı çizilir).
+// latin-ext, Türkçe harfler (ğ, ş, ı, İ) içindir.
+import "@fontsource/poppins/latin-400.css";
+import "@fontsource/poppins/latin-ext-400.css";
+import "@fontsource/poppins/latin-500.css";
+import "@fontsource/poppins/latin-ext-500.css";
+import "@fontsource/poppins/latin-600.css";
+import "@fontsource/poppins/latin-ext-600.css";
+import "@fontsource/space-grotesk/latin-500.css";
+import "@fontsource/space-grotesk/latin-ext-500.css";
+import "@fontsource/space-grotesk/latin-600.css";
+import "@fontsource/space-grotesk/latin-ext-600.css";
 import { jsonLd, kulupSemasi, siteSemasi } from "../seo";
 import { METIN, YOLLAR, yol, type Dil, type Sayfa } from "../i18n";
 import { ayarlar, epostaHref } from "../veri";
@@ -61,9 +73,6 @@ const menu = (Object.keys(YOLLAR) as Sayfa[]).map((s) => ({ s, href: yol(s, dil)
   <script type="application/ld+json" set:html={yapisalVeri} />
   <meta name="theme-color" content="#0A118E" />
   <link rel="icon" href="/img/kulup-logo.png" type="image/png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" />
 </head>
 <body>
   <a class="atla" href="#icerik">{dil === "en" ? "Skip to content" : "İçeriğe geç"}</a>
