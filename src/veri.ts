@@ -55,7 +55,7 @@ export async function etkinlikler(dil: Dil) {
         ozet: sec(e.ozet, e.ozetEn),
         yer: sec(e.yer, e.yerEn),
         tur: M.turler[e.tur],
-        konuklar: e.konuklar,
+        konuklar: dil === "en" && e.konuklarEn.length ? e.konuklarEn : e.konuklar,
         ortaklar: e.ortaklar.map((o) => ortakAd.get(o) ?? o),
         ortakIdleri: e.ortaklar,
         ortakLogolari: e.ortaklar.map((o) => ({ ad: ortakAd.get(o) ?? o, logo: ortakLogo.get(o) ?? "" })),

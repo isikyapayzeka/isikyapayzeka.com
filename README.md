@@ -42,6 +42,7 @@ link: ""
 ---
 ```
 - `tur` şunlardan biri: `atolye`, `soylesi`, `yayin`, `sosyal`, `yarisma`, `diger`.
+- Konuğun unvanı ya da kurumu Türkçeyse (`Dr. Öğr. Üyesi`, `İTÜ` gibi) İngilizce sayfa için `konuklarEn:` listesini aynı sırayla ekleyin. Eklemezseniz İngilizce sayfada Türkçesi görünür.
 - `ortaklar` içindeki adlar `src/data/ortaklar.yml` dosyasındaki `id` değerleridir.
 - Etkinlik tarihi gelene kadar "Yaklaşan etkinlikler"de durur, bitince kendiliğinden "Geçmiş etkinlikler"e geçer.
 - Link sayfasındaki (`/link`) "Sıradaki etkinlik" kartı da buradan dolar: en yakın tarihli etkinlik, afişi, kayıt ve takvim butonlarıyla görünür. Ayrıca bir şey yazmanız gerekmez.

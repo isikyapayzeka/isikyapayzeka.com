@@ -64,6 +64,35 @@ export function siteSemasi(dil: Dil, site: URL): Dugum {
   };
 }
 
+// Sayfanın kendisi: adı, dili ve içeriğinin son değiştiği tarih (src/tazelik.ts).
+export function sayfaSemasi(s: { url: string; ad: string; aciklama: string; dil: Dil; degisiklik: string }, site: URL): Dugum {
+  return {
+    "@type": "WebPage",
+    "@id": `${s.url}#sayfa`,
+    url: s.url,
+    name: s.ad,
+    description: s.aciklama,
+    inLanguage: s.dil,
+    isPartOf: { "@id": new URL("/#site", site).href },
+    about: { "@id": kulupKimligi(site) },
+    ...(s.degisiklik ? { dateModified: s.degisiklik } : {}),
+  };
+}
+
+// Sık sorulan sorular: sayfada görünen soru ve yanıtların aynısı.
+export function sssSemasi(sorular: { soru: string; cevap: string }[], sayfaUrl: string): Dugum {
+  return {
+    "@type": "FAQPage",
+    "@id": `${sayfaUrl}#sss`,
+    url: sayfaUrl,
+    mainEntity: sorular.map((x) => ({
+      "@type": "Question",
+      name: x.soru,
+      acceptedAnswer: { "@type": "Answer", text: x.cevap },
+    })),
+  };
+}
+
 // Sayfanın sitedeki yeri: Ana sayfa › Etkinlikler › Etkinlik adı
 export function yolSemasi(adimlar: { ad: string; yol: string }[], site: URL): Dugum {
   return {

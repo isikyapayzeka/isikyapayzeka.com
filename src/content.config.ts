@@ -20,6 +20,8 @@ const etkinlikler = defineCollection({
     yerEn: z.string().default(""),
     tur: z.enum(["atolye", "soylesi", "yayin", "sosyal", "yarisma", "diger"]).default("diger"),
     konuklar: z.array(z.string()).default([]),
+    // Unvanı ya da kurumu Türkçe olan konukların İngilizce yazımı (aynı sırayla). Boşsa Türkçesi gösterilir.
+    konuklarEn: z.array(z.string()).default([]),
     ortaklar: z.array(z.string()).default([]),
     ozet: z.string().default(""),
     ozetEn: z.string().default(""),

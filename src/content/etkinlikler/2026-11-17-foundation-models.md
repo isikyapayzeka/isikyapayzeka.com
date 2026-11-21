@@ -8,6 +8,8 @@ yerEn: "Şile Campus, LMF 117"
 tur: soylesi
 konuklar:
   - "Dr. Öğr. Üyesi Yusuf Hüseyin Şahin · İTÜ Bilgisayar Mühendisliği"
+konuklarEn:
+  - "Asst. Prof. Yusuf Hüseyin Şahin · ITU Computer Engineering"
 ortaklar: ["isik-itmis", "lavazza"]
 ozet: "GPT, CLIP ve difüzyon modelleri gibi foundation modellerin nasıl çalıştığını, nerede zorlandığını ve alanın nereye gittiğini konuştuk."
 ozetEn: "How foundation models like GPT, CLIP and diffusion models work, where they struggle and where the field is heading."
