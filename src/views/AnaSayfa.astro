@@ -106,6 +106,7 @@ const R = await rakamlar();
         {A.uyeFormu && <a class="btn btn--ana" href={A.uyeFormu}>{M.uyeOl}</a>}
         {A.ekipBasvuru && <a class="btn" href={A.ekipBasvuru}>{M.ekibeKatil}</a>}
       </div>
+      {A.uyeFormu && <a class="metin-link" href={`${yol("hakkimizda", dil)}#uye-ol`}>{M.uyelikBaslik} →</a>}
     </div>
   </section>
 </Base>

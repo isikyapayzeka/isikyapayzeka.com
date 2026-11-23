@@ -21,6 +21,9 @@ const doldur = (m: string) =>
 const sss = M.sss
   .filter((x) => (ilk || !x.cevap.includes("{ilk")) && (A.eposta || !x.cevap.includes("{eposta}")))
   .map((x) => ({ soru: x.soru, cevap: doldur(x.cevap) }));
+// Üyelik adımları: sırasıyla form, WhatsApp topluluğu ve etkinlikler sayfası.
+const adimHref = [A.uyeFormu, A.whatsapp, yol("etkinlikler", dil)];
+const adimlar = M.uyelikAdimlar.map((a, i) => ({ ...a, href: adimHref[i] })).filter((a) => a.href);
 const sema = [sssSemasi(sss, new URL(yol("hakkimizda", dil), Astro.site).href)];
 ---
 <Base dil={dil} sayfa="hakkimizda" baslik={M.hakkimizdaBaslik} sema={sema}>
@@ -54,6 +57,22 @@ const sema = [sssSemasi(sss, new URL(yol("hakkimizda", dil), Astro.site).href)];
       {A.ekipBasvuru && <a class="btn" href={A.ekipBasvuru}>{M.ekibeKatil}</a>}
     </div>
   </section>
+
+  {A.uyeFormu && (
+    <section class="bolum kap" aria-labelledby="uye-ol">
+      <div class="bolum-bas"><h2 id="uye-ol">{M.uyelikBaslik}</h2></div>
+      <p class="ikincil uzun">{M.uyelikGiris}</p>
+      <ol class="adimlar">
+        {adimlar.map((a, i) => (
+          <li>
+            <span class="etiket" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+            <h3><a href={a.href}>{a.baslik}</a></h3>
+            <p class="ikincil">{a.metin}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
 
   {E.length > 0 && (
     <section class="bolum kap" aria-labelledby="ekip">
@@ -110,6 +129,12 @@ const sema = [sssSemasi(sss, new URL(yol("hakkimizda", dil), Astro.site).href)];
   .iki .uzun { margin-top: 10px; }
   .satir { display: flex; flex-wrap: wrap; gap: 10px; }
   @media (min-width: 820px) { .iki { grid-template-columns: 1fr auto; align-items: end; } }
+
+  .adimlar { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 0 48px; border-top: 1px solid var(--cizgi); }
+  .adimlar li { display: grid; gap: 6px; align-content: start; padding-block: 22px; border-bottom: 1px solid var(--cizgi); }
+  .adimlar .etiket { color: var(--soluk); }
+  .adimlar h3 a { color: var(--yazi); text-underline-offset: 4px; text-decoration-color: rgba(10, 17, 142, 0.35); }
+  @media (min-width: 820px) { .adimlar { grid-template-columns: repeat(3, 1fr); } }
 
   .ekip { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
   .ekip li { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 16px; background: var(--yuzey); border: 1px solid var(--cizgi); }
